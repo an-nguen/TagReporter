@@ -1,0 +1,49 @@
+﻿<Page x:Class="TagReporter.Views.ZoneManagerPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:TagReporter.Views"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="ZoneManagerPage">
+    <Page.Resources>
+        <ResourceDictionary x:Name="PageResourceDictionary">
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/lang.en-US.xaml" />
+                <ResourceDictionary Source="Resources/style.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="120" />
+        </Grid.ColumnDefinitions>
+        <ListView x:Name="ZoneListView" Margin="2" ItemsSource="{Binding Zones}"
+                  SelectedItem="{Binding SelectedItem}"
+                  IsSynchronizedWithCurrentItem="True" 
+                                         local:GridViewSort.AutoSort="True">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" >
+                    </EventSetter>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="{DynamicResource ResourceKey=Name}"
+                                        DisplayMemberBinding="{Binding Name}"
+                                        local:GridViewSort.PropertyName="Name" />
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <StackPanel Grid.Column="1">
+            <Button Margin="2" Content="{DynamicResource ResourceKey=Add}" Command="{Binding AddCmd}" />
+            <Button Margin="2" Content="{DynamicResource ResourceKey=Edit}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
+            <Button Margin="2" Content="{DynamicResource ResourceKey=Remove}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
+        </StackPanel>
+    </Grid>
+</Page>
