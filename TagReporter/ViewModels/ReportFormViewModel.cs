@@ -20,6 +20,8 @@ using TagReporter.DTOs;
 using TagReporter.Models;
 using TagReporter.Repositories;
 
+using static TagReporter.Utils.ResourceUtils;
+
 namespace TagReporter.ViewModels
 {
     public class ComboBoxItem
@@ -50,13 +52,9 @@ namespace TagReporter.ViewModels
 
         private readonly StatusBarResource _statusBarResource = StatusBarResource.Instance;
         private readonly ResourceDictionary _resource = CommonResources.GetLangResourceDictionary();
-        
 
-            public List<ComboBoxItem> MeasurementDataTypes { get; } = new()
-        {
-            new ComboBoxItem("Temperature", "temperature"),
-            new ComboBoxItem("Humidity", "cap"),
-        };
+
+        public List<ComboBoxItem> MeasurementDataTypes { get; }
 
         public DateTime StartDateTime
         {
@@ -68,11 +66,14 @@ namespace TagReporter.ViewModels
                 OnPropertyChanged(nameof(StartTimeSpan));
             }
         }
+
         public TimeSpan StartTimeSpan
         {
             get => _startDateTime.TimeOfDay;
-            set => StartDateTime = new DateTime(StartDateTime.Year, StartDateTime.Month, StartDateTime.Day, value.Hours, value.Minutes, value.Seconds);
+            set => StartDateTime = new DateTime(StartDateTime.Year, StartDateTime.Month, StartDateTime.Day, value.Hours,
+                value.Minutes, value.Seconds);
         }
+
         public DateTime EndDateTime
         {
             get => _endDateTime;
@@ -83,16 +84,19 @@ namespace TagReporter.ViewModels
                 OnPropertyChanged(nameof(EndTimeSpan));
             }
         }
+
         public TimeSpan EndTimeSpan
         {
             get => _endDateTime.TimeOfDay;
             set
             {
-                EndDateTime = new DateTime(EndDateTime.Year, EndDateTime.Month, EndDateTime.Day, value.Hours, value.Minutes, value.Seconds);
+                EndDateTime = new DateTime(EndDateTime.Year, EndDateTime.Month, EndDateTime.Day, value.Hours,
+                    value.Minutes, value.Seconds);
             }
         }
 
         private Zone? _selectedZone;
+
         public Zone? SelectedZone
         {
             get => _selectedZone;
@@ -105,6 +109,7 @@ namespace TagReporter.ViewModels
 
 
         private ZoneGroup? _selectedZoneGroup;
+
         public ZoneGroup? SelectedZoneGroup
         {
             get => _selectedZoneGroup;
@@ -117,6 +122,7 @@ namespace TagReporter.ViewModels
 
 
         private string? _selectedDataType;
+
         public string? SelectedDataType
         {
             get => _selectedDataType;
@@ -129,6 +135,7 @@ namespace TagReporter.ViewModels
         }
 
         private bool _zonesSelected;
+
         public bool IsZonesSelected
         {
             get => _zonesSelected;
@@ -159,9 +166,13 @@ namespace TagReporter.ViewModels
 
         public ReportFormViewModel()
         {
-
             _zoneGroupRepository.FindAll().ForEach(ZoneGroups.Add);
             _zoneRepository.FindAll().ForEach(Zones.Add);
+            MeasurementDataTypes = new List<ComboBoxItem>
+            {
+                new($"{GetResourceStr(_resource, "Temperature")}", "temperature"),
+                new($"{GetResourceStr(_resource, "Humidity")}", "cap"),
+            };
 
             SetMorningTimeCmd = ReactiveCommand.Create(() =>
             {
@@ -178,14 +189,14 @@ namespace TagReporter.ViewModels
             SetWeeklyTimeCmd = ReactiveCommand.Create(() =>
             {
                 var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-                StartDateTime = date.AddDays(-(int)date.DayOfWeek - (int)DayOfWeek.Saturday).AddHours(9);
-                EndDateTime = date.AddDays(-(int)date.DayOfWeek + 1).AddHours(9);
+                StartDateTime = date.AddDays(-(int) date.DayOfWeek - (int) DayOfWeek.Saturday).AddHours(9);
+                EndDateTime = date.AddDays(-(int) date.DayOfWeek + 1).AddHours(9);
             });
             SetFriToMonTimeCmd = ReactiveCommand.Create(() =>
             {
                 var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-                StartDateTime = date.AddDays(-(int)date.DayOfWeek - (int)DayOfWeek.Tuesday).AddHours(16);
-                EndDateTime = date.AddDays(-(int)date.DayOfWeek + 1).AddHours(9);
+                StartDateTime = date.AddDays(-(int) date.DayOfWeek - (int) DayOfWeek.Tuesday).AddHours(16);
+                EndDateTime = date.AddDays(-(int) date.DayOfWeek + 1).AddHours(9);
             });
             CheckAllZonesCmd = ReactiveCommand.Create(() =>
             {
@@ -230,22 +241,28 @@ namespace TagReporter.ViewModels
 
                 if (!isValid)
                 {
-                    MessageBox.Show($"{_resource["ZonesNotSelected"].ToString() ?? "ZonesNotSelected"}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"{GetResourceStr(_resource, "ZonesNotSelected")}!", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+
                 _statusBarResource.StatusBarLoading = true;
-                _statusBarResource.StatusBarStringContent = $"{_resource["CreatingReports"].ToString() ?? "ZonesNotSelected"}";
+                _statusBarResource.StatusBarStringContent =
+                    $"{GetResourceStr(_resource, "CreatingReports")}";
                 if (SelectedDataType == null)
                 {
-                    _statusBarResource.StatusBarStringContent = $"[{DateTime.Now:G}] {_resource["UnknownDataType"].ToString() ?? "UnknownDataType"}";
+                    _statusBarResource.StatusBarStringContent =
+                        $"[{DateTime.Now:G}] {GetResourceStr(_resource, "UnknownDataType")}";
                     return;
                 }
+
                 var dataType = SelectedDataType;
                 await Task.Run(() =>
                 {
                     if (GenerateReports(Zones, StartDateTime, EndDateTime, dataType))
                     {
-                        _statusBarResource.StatusBarStringContent = $"[{DateTime.Now:G}] {_resource["ReportsCreated"].ToString() ?? "ReportsCreated"}";
+                        _statusBarResource.StatusBarStringContent =
+                            $"[{DateTime.Now:G}] {GetResourceStr(_resource, "ReportsCreated")}";
                     }
                 });
                 _statusBarResource.StatusBarLoading = false;
@@ -257,7 +274,8 @@ namespace TagReporter.ViewModels
                 if (SelectedZoneGroup == null) return;
 
                 Tags.Clear();
-                var zoneGroup = _zoneGroupRepository.Query().Where(zg => zg.Id == SelectedZoneGroup.Id).FirstOrDefault();
+                var zoneGroup = _zoneGroupRepository.Query().Where(zg => zg.Id == SelectedZoneGroup.Id)
+                    .FirstOrDefault();
                 zoneGroup.Zones.ForEach(z =>
                 {
                     var tags = _tagRepository.FindTagsByZone(z);
@@ -271,7 +289,9 @@ namespace TagReporter.ViewModels
                 {
                     zone.IsChecked = false;
                 }
-                var zoneGroup = _zoneGroupRepository.Query().Where(zg => SelectedZoneGroup != null && zg.Id == SelectedZoneGroup.Id).FirstOrDefault();
+
+                var zoneGroup = _zoneGroupRepository.Query()
+                    .Where(zg => SelectedZoneGroup != null && zg.Id == SelectedZoneGroup.Id).FirstOrDefault();
                 zoneGroup.Zones.ForEach(z =>
                 {
                     var found = Zones.FirstOrDefault(zone => zone.Uuid == z.Uuid);
@@ -283,19 +303,24 @@ namespace TagReporter.ViewModels
             });
         }
 
-        public bool GenerateReports(IEnumerable<Zone> zones, DateTime startDateTime, DateTime endDateTime, string dataType)
+        public bool GenerateReports(IEnumerable<Zone> zones, DateTime startDateTime, DateTime endDateTime,
+            string dataType)
         {
             var savePath = _configRepository.Collection().FindById("save_path").Value;
             if (savePath == null)
             {
-                MessageBox.Show($"{_resource["InvalidSavePath"].ToString() ?? "InvalidSavePath"}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{GetResourceStr(_resource, "InvalidSavePath")}!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+
             if (!Directory.Exists(savePath))
             {
-                MessageBox.Show($"{_resource["InvalidSavePath"].ToString() ?? "InvalidSavePath"}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{GetResourceStr(_resource, "InvalidSavePath")}!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+
             try
             {
                 List<Task> tasks = new();
@@ -306,8 +331,7 @@ namespace TagReporter.ViewModels
                     {
                         if (!GenerateReport(zone, startDateTime, endDateTime, savePath, dataType))
                             _statusBarResource.StatusBarStringContent =
-                                $"[{DateTime.Now:G}] Failed to create report for {zone.Name}.";
-                        
+                                $"[{DateTime.Now:G}] {GetResourceStr(_resource, "CreateReportFailed")} {zone.Name}.";
                     }));
                 }
 
@@ -324,19 +348,18 @@ namespace TagReporter.ViewModels
             }
             catch (Exception exception)
             {
-                var exceptionPathLog = @".\exception.log";
-                MessageBox.Show($"{exception.Message}\n{exception}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                const string? exceptionPathLog = @".\exception.log";
+                MessageBox.Show($"{exception.Message}\n{exception}", "Error", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
                 if (File.Exists(exceptionPathLog))
-                {
                     File.Delete(exceptionPathLog);
-                }
 
-                using (var sw = new StreamWriter(exceptionPathLog))
-                {
-                    sw.Write(exception);
-                }
+                using var sw = new StreamWriter(exceptionPathLog);
+                sw.Write(exception);
+
                 return false;
             }
+
             return true;
         }
 
@@ -345,15 +368,18 @@ namespace TagReporter.ViewModels
             zone.Tags = _tagRepository.FindTagsByZone(zone);
             if (zone.Tags.Count == 0)
             {
-                _statusBarResource.StatusBarStringContent = $"[{DateTime.Now:G}] {_resource["NoTags"].ToString() ?? "NoTags"}. ({zone.Name}).";
+                _statusBarResource.StatusBarStringContent =
+                    $"[{DateTime.Now:G}] {GetResourceStr(_resource, "NoTags")}. ({zone.Name}).";
                 return false;
             }
 
             LoadMeasurements(zone, startDate, endDate);
-            _statusBarResource.StatusBarStringContent = $"[{DateTime.Now:G}] {_resource["MeasurementsLoaded"].ToString() ?? "MeasurementsLoaded"}. ({zone.Name}).";
+            _statusBarResource.StatusBarStringContent =
+                $"[{DateTime.Now:G}] {GetResourceStr(_resource, "MeasurementsLoaded")}. ({zone.Name}).";
 
             GenerateXlsxReportFile(zone, startDate, endDate, dirName, dataType);
-            _statusBarResource.StatusBarStringContent = $"[{DateTime.Now:G}] {_resource["XlsxCreated"].ToString() ?? "XlsxCreated"}. ({zone.Name}).";
+            _statusBarResource.StatusBarStringContent =
+                $"[{DateTime.Now:G}] {GetResourceStr(_resource, "XlsxCreated")}. ({zone.Name}).";
 
             zone.Tags.Clear();
 
@@ -366,7 +392,7 @@ namespace TagReporter.ViewModels
             string toDateStr = endDate.ToString("M/d/yyyy HH:mm");
 
             var tasks = new List<Task>();
-            
+
             foreach (var tag in zone.Tags)
             {
                 tasks.Add(Task.Factory.StartNew(() =>
@@ -377,7 +403,7 @@ namespace TagReporter.ViewModels
                         request.fromDate = fromDateStr;
                         request.toDate = toDateStr;
                         request.uuid = tag.Uuid.ToString();
-                        var client = new HttpClient() {BaseAddress = CommonResources.BaseAddress};
+                        var client = new HttpClient {BaseAddress = CommonResources.BaseAddress};
 
                         var jsonRequestBody = JsonConvert.SerializeObject(request);
                         var content = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
@@ -394,19 +420,22 @@ namespace TagReporter.ViewModels
                             if (r.time == null) continue;
                             var dateTime = DateTime.Parse(r.time);
                             if (dateTime > startDate && dateTime < endDate)
-                            {
                                 tag.Measurements.Add(new Measurement(dateTime, Math.Round(r.temp_degC, 6), r.cap));
-                            }
                         }
 
-                        if (tag.Measurements.Count == 0) MessageBox.Show($"{tag.Name}");
+                        if (tag.Measurements.Count == 0)
+                            MessageBox.Show(
+                                $"{GetResourceStr(_resource, "Tag")}: {tag.Name}.\n{GetResourceStr(_resource, "Period")}: {startDate:G}-{endDate:G}\n{GetResourceStr(_resource, "NoMeasurements")}",
+                                "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show($"{e.Message}\n; {_resource["TryUpdateTags"].ToString() ?? "TryUpdateTags"}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"{e.Message}\n; {GetResourceStr(_resource, "TryUpdateTags")}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }));
             }
+
             Task.WaitAll(tasks.ToArray());
         }
 
@@ -417,7 +446,8 @@ namespace TagReporter.ViewModels
             return diff.TotalDays + 2;
         }
 
-        private void GenerateXlsxReportFile(Zone zone, DateTime startDate, DateTime endDate, string dirName, string dataType)
+        private void GenerateXlsxReportFile(Zone zone, DateTime startDate, DateTime endDate, string dirName,
+            string dataType)
         {
             var date = DateTime.Now.ToString("dd-MM-yyyy HH-mm");
             var path = $@"{dirName}\{zone.Name} - {date}.xlsx";
@@ -427,55 +457,72 @@ namespace TagReporter.ViewModels
             {
                 using (var package = new ExcelPackage(fs))
                 {
-                    var chartSheet = package.Workbook.Worksheets.Add("График");
-                    var tagsSheet = package.Workbook.Worksheets.Add("Теги");
-                    var scatterLineChart0 = chartSheet.Drawings.AddChart("scatterLineChart0", eChartType.XYScatterSmoothNoMarkers);
-                    scatterLineChart0.Title.Text = $"{zone.Name}\n{startDate:dd.MM.yyyy HH:mm:ss} - {endDate:dd.MM.yyyy HH:mm:ss}";
+                    // Create excel lists for 
+                    var chartSheet = package.Workbook.Worksheets.Add($"{GetResourceStr(_resource, "Chart")}");
+                    var tagsSheet = package.Workbook.Worksheets.Add($"{GetResourceStr(_resource, "Tags")}");
+                    // Add chart and set chart title
+                    var scatterLineChart0 =
+                        chartSheet.Drawings.AddChart("scatterLineChart0", eChartType.XYScatterSmoothNoMarkers);
+                    scatterLineChart0.Title.Text =
+                        $"{zone.Name}\n{startDate:dd.MM.yyyy HH:mm:ss} - {endDate:dd.MM.yyyy HH:mm:ss}";
                     scatterLineChart0.Title.Font.Size = 18;
                     scatterLineChart0.SetSize(1024, 768);
-                    scatterLineChart0.XAxis.Title.Text = "Время";
+
+                    scatterLineChart0.XAxis.Title.Text = $"{GetResourceStr(_resource, "Time")}";
                     scatterLineChart0.XAxis.Format = "dd.MM.yyyy HH:mm:ss";
                     scatterLineChart0.XAxis.TextBody.Rotation = 270;
                     scatterLineChart0.XAxis.MinValue = GetExcelDecimalValueForDate(startDate);
-                    scatterLineChart0.XAxis.MaxValue = GetExcelDecimalValueForDate(endDate);
-                    switch (dataType)
-                    {
-                        case "temperature":
-                            scatterLineChart0.YAxis.Title.Text = "Температура (ºС)";
-                            break;
-                        case "cap":
-                            scatterLineChart0.YAxis.Title.Text = "Влажность (%)";
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(dataType), $"Unknown data type ${dataType}");
-                    }
+                    scatterLineChart0.XAxis.MaxValue = GetExcelDecimalValueForDate(endDate.AddHours(1));
+                    
                     scatterLineChart0.YAxis.Title.Rotation = 270;
                     scatterLineChart0.YAxis.Format = "0.00";
                     scatterLineChart0.YAxis.MajorTickMark = eAxisTickMark.Out;
                     scatterLineChart0.YAxis.MinorTickMark = eAxisTickMark.None;
 
-
                     scatterLineChart0.Legend.Position = eLegendPosition.Right;
+
+
+                    double minValue, maxValue;
+                    var tagMeasurements = new List<Measurement>();
+                    zone.Tags.ForEach(t =>
+                    {
+                        tagMeasurements.AddRange(t.Measurements);
+                    });
+
+                    switch (dataType)
+                    {
+                        case "temperature":
+                            scatterLineChart0.YAxis.Title.Text = $"{GetResourceStr(_resource, "Temperature")} (ºС)";
+                            minValue = tagMeasurements.Count > 0 ? tagMeasurements.Min(m => m.TemperatureValue) - 3: 0;
+                            maxValue = tagMeasurements.Count > 0 ? tagMeasurements.Max(m => m.TemperatureValue) + 3: 40;
+                            break;
+                        case "cap":
+                            scatterLineChart0.YAxis.Title.Text = $"{GetResourceStr(_resource, "Humidity")} (%)";
+                            minValue = tagMeasurements.Count > 0 ? tagMeasurements.Min(m => m.Cap) - 3 : 0;
+                            maxValue = tagMeasurements.Count > 0 ? tagMeasurements.Max(m => m.Cap) + 3 : 100;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(dataType), $"Unknown data type ${dataType}");
+                    }
+
                     int dateTimePointer = 1; // A
                     int valuePointer = 2; // B
 
-                    
-                    double minValue = zone.Tags[0].Measurements.Count > 0 ? zone.Tags[0].Measurements[0].TemperatureValue : 0;
-                    double maxValue = zone.Tags[0].Measurements.Count > 0 ? zone.Tags[0].Measurements[0].TemperatureValue : 30;
+                    // Populate second list 'Tags' with tag measurements data
                     foreach (var tag in zone.Tags)
                     {
                         int rowNumber = 1;
-                        tagsSheet.Cells[rowNumber, dateTimePointer].Value = "Дата Время";
+                        tagsSheet.Cells[rowNumber, dateTimePointer].Value = $"{GetResourceStr(_resource, "Date")} {GetResourceStr(_resource, "Time")}";
                         tagsSheet.Cells[rowNumber, valuePointer].Value = tag.Name;
-                        // ExcelRange rangeLabel = tagsSheet.Cells[rowNumber, dateTimePointer, rowNumber, valuePointer];
 
                         foreach (var m in tag.Measurements)
                         {
-                            if (m.TemperatureValue < minValue) minValue = m.TemperatureValue;
-                            if (m.TemperatureValue > maxValue) maxValue = m.TemperatureValue;
                             rowNumber++;
+                            // Set date time
                             tagsSheet.Cells[rowNumber, dateTimePointer].Value = m.DateTime;
-                            tagsSheet.Cells[rowNumber, dateTimePointer].Style.Numberformat.Format = "dd.MM.yyyy HH:mm:ss";
+                            tagsSheet.Cells[rowNumber, dateTimePointer].Style.Numberformat.Format =
+                                "dd.MM.yyyy HH:mm:ss";
+                            // According to data type set value
                             switch (dataType)
                             {
                                 case "temperature":
@@ -485,32 +532,32 @@ namespace TagReporter.ViewModels
                                     tagsSheet.Cells[rowNumber, valuePointer].Value = Math.Round(m.Cap, 6);
                                     break;
                                 default:
-                                    throw new ArgumentOutOfRangeException(nameof(dataType), $"Unknown data type ${dataType}");
+                                    throw new ArgumentOutOfRangeException(nameof(dataType),
+                                        $"Unknown data type ${dataType}");
                             }
                         }
 
-                        scatterLineChart0.YAxis.MinValue = Math.Round(minValue - 1);
-                        scatterLineChart0.YAxis.MaxValue = Math.Round(maxValue + 1);
+                        scatterLineChart0.YAxis.MinValue = minValue;
+                        scatterLineChart0.YAxis.MaxValue = maxValue;
 
-                        var serie = scatterLineChart0.Series.Add(
+                        var series = scatterLineChart0.Series.Add(
                             tagsSheet.Cells[2, valuePointer, rowNumber, valuePointer],
                             tagsSheet.Cells[2, dateTimePointer, rowNumber, dateTimePointer]
-                            );
-                        serie.HeaderAddress = tagsSheet.Cells[1, valuePointer];
+                        );
+                        series.HeaderAddress = tagsSheet.Cells[1, valuePointer];
 
                         tagsSheet.Cells[rowNumber, dateTimePointer].AutoFitColumns();
                         tagsSheet.Cells[rowNumber, valuePointer].AutoFitColumns();
 
                         dateTimePointer += 2;
                         valuePointer += 2;
+
                         tag.Measurements.Clear();
                     }
-
 
                     package.Save();
                 }
             }
-
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;

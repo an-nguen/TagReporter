@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,11 +30,13 @@ namespace TagReporter.ViewModels
         public StatusBarResource StatusBarResource { get; } = StatusBarResource.Instance;
 
         private AccountRepository _accountRepository { get; } = new();
-        private ZoneTagRepository _zoneTagRepository = new();
+        private readonly ZoneTagRepository _zoneTagRepository = new();
         private TagRepository _tagRepository { get; } = new();
         private ConfigRepository _configRepository { get; } = new();
 
-        private List<IViewComponent> _viewComponents = new();
+        private readonly List<IViewComponent> _viewComponents = new();
+
+        public string WindowTitle { get; set; }
 
         private ReportFormPage? _reportFormPage;
         public ReportFormPage? ReportFormPage
@@ -112,7 +116,7 @@ namespace TagReporter.ViewModels
         public ReactiveCommand<Unit, Unit> GoForwardCmd { get; }
         public ReactiveCommand<Unit, Unit> SyncTagsFromCloudCmd { get; }
 
-        private ResourceDictionary _resourceDictionary;
+        private readonly ResourceDictionary _resourceDictionary;
 
         public MainViewModel(Frame contentFrame, ResourceDictionary resourceDictionary)
         {
@@ -132,9 +136,12 @@ namespace TagReporter.ViewModels
                 };
                 _configRepository.Create(languageConfig);
             }
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(languageConfig.Value!);
+            Thread.CurrentThread.CurrentCulture = new CultureInfo(languageConfig.Value!);
             UpdateMainWindowLanguage();
 
+            var buildDateTime = GetLinkerTime(Assembly.GetEntryAssembly());
+            WindowTitle = $"Tag Reporter (Build date: {buildDateTime:G})";
+                
             OpenReportFormPageCommand = ReactiveCommand.Create(() => NavigationService.NavigateTo(ReportFormPage!));
             OpenAccountMgrPageCommand = ReactiveCommand.Create(() => NavigationService.NavigateTo(AccountManagerPage!));
             OpenZoneMgrPageCommand = ReactiveCommand.Create(() => NavigationService.NavigateTo(ZoneManagerPage!));
@@ -213,6 +220,8 @@ namespace TagReporter.ViewModels
         }
         private void GetTagsRemotely(Account account)
         {
+            var resource = CommonResources.GetLangResourceDictionary();
+
             // Fetch tag list from cloud
             var cookieContainer = new CookieContainer();
             using var handler = new HttpClientHandler()
@@ -243,10 +252,32 @@ namespace TagReporter.ViewModels
                 var dbTag = _tagRepository.FindAll().FirstOrDefault(t => t.Uuid == tag.Uuid);
                 if (dbTag != null)
                 {
+                    MessageBox.Show($"{resource["TagDuplicationDetected"].ToString() ?? "TagDuplicationDetected"}\n" +
+                                    $"{resource["Tag"].ToString() ?? "Tag"}: {tag.Uuid} - {tag.Name}\n",
+                        "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     continue;
                 }
                 _tagRepository.Create(tag);
             }
+        }
+
+        public static DateTime GetLinkerTime(Assembly? assembly)
+        {
+            const string buildVersionMetadataPrefix = "+build";
+
+            var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            if (attribute?.InformationalVersion != null)
+            {
+                var value = attribute.InformationalVersion;
+                var index = value.IndexOf(buildVersionMetadataPrefix, StringComparison.Ordinal);
+                if (index > 0)
+                {
+                    value = value[(index + buildVersionMetadataPrefix.Length)..];
+                    return DateTime.ParseExact(value, "yyyy-MM-ddTHH:mm:ss:fffZ", CultureInfo.InvariantCulture);
+                }
+            }
+
+            return default;
         }
 
 

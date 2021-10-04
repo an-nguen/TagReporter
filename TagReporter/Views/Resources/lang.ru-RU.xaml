@@ -50,4 +50,15 @@
     <v:String x:Key="InvalidSavePath">Путь сохранения неверен</v:String>
     <v:String x:Key="SelectDir">Путь...</v:String>
     <v:String x:Key="TryUpdateTags">Попробуйте обновить теги (Пункт 'Обновить теги' в верхней правой части программы).</v:String>
+    <v:String x:Key="EmailOrPasswordCannotBeEmpty">Поле эл. почты или поле с паролем не могут быть пустыми.</v:String>
+    <v:String x:Key="NameCannotBeEmpty">Поле с названием не может быть пустым.</v:String>
+    <v:String x:Key="NoMeasurements">Нет измерении.</v:String>
+    <v:String x:Key="Period">Период</v:String>
+    <v:String x:Key="TagDuplicationDetected">Найден повторяющийся тег!</v:String>
+    <v:String x:Key="Time">Время</v:String>
+    <v:String x:Key="Date">Дата</v:String>
+    <v:String x:Key="Chart">График</v:String>
+    <v:String x:Key="Temperature">Температура</v:String>
+    <v:String x:Key="Humidity">Влажность</v:String>
+    <v:String x:Key="CreateReportFailed">Не удалось сформировать отчёт</v:String>
 </ResourceDictionary>

@@ -68,6 +68,11 @@ namespace TagReporter.ViewModels
                     }
                     AddEditCmd = ReactiveCommand.Create<ZoneEditWindow>((wnd) =>
                     {
+                        if (string.IsNullOrEmpty(Name))
+                        {
+                            MessageBox.Show($"{resource["NameCannotBeEmpty"].ToString() ?? "NameCannotBeEmpty"}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                         try
                         {
                             _zoneRepository.Update(_zone, new()
@@ -99,6 +104,11 @@ namespace TagReporter.ViewModels
                     Title = AddEditBtnContent = resource["Add"].ToString() ?? "Add";
                     AddEditCmd = ReactiveCommand.Create<ZoneEditWindow>((wnd) =>
                     {
+                        if (string.IsNullOrEmpty(Name))
+                        {
+                            MessageBox.Show($"{resource["NameCannotBeEmpty"].ToString() ?? "NameCannotBeEmpty"}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                         try
                         {
                             var uuid = _zoneRepository.Create(new Zone()

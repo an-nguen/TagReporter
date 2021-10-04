@@ -12,6 +12,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <NeutralLanguage>en</NeutralLanguage>
     <ApplicationIcon>tag_reporter_icon.ico</ApplicationIcon>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,5 +63,9 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+
+  <PropertyGroup>
+    <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
+  </PropertyGroup>
 
 </Project>

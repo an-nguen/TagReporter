@@ -36,6 +36,13 @@ namespace TagReporter.ViewModels
                     Password = _account.Password;
                     AddEditCommand = ReactiveCommand.Create<AccountEditWindow>((wnd) =>
                     {
+                        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+                        {
+                            MessageBox.Show(
+                                $"{resource["EmailOrPasswordCannotBeEmpty"].ToString() ?? "EmailOrPasswordCannotBeEmpty"}",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                         try
                         {
                             _accountRepository.Update(_account, new Account(Email!, Password!));
@@ -51,6 +58,13 @@ namespace TagReporter.ViewModels
                     Title = AddEditBtnContent = resource["Add"].ToString() ?? "Add";
                     AddEditCommand = ReactiveCommand.Create<AccountEditWindow>((wnd) =>
                     {
+                        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+                        {
+                            MessageBox.Show(
+                                $"{resource["EmailOrPasswordCannotBeEmpty"].ToString() ?? "EmailOrPasswordCannotBeEmpty"}",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                         try
                         {
                             _accountRepository.Create(new Account(Email!, Password!));

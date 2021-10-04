@@ -35,7 +35,7 @@ namespace TagReporter.ViewModels
             var resource = CommonResources.GetLangResourceDictionary();
 
             _zoneRepository.FindAll().ForEach(Zones.Add);
-            _zoneGroup = group != null ? group : new();
+            _zoneGroup = @group ?? new();
             Name = _zoneGroup.Name;
 
             SelectAllCmd = ReactiveCommand.Create(() =>
@@ -89,7 +89,7 @@ namespace TagReporter.ViewModels
                     });
                     break;
                 case EditMode.Create:
-                    Title = AddEditBtnContent = resource["Add"].ToString();
+                    Title = AddEditBtnContent = resource["Add"].ToString() ?? "Add";
                     AddEditCmd = ReactiveCommand.Create<ZoneGroupEditWindow>((wnd) =>
                     {
                         if (string.IsNullOrEmpty(Name))

@@ -50,4 +50,15 @@
     <v:String x:Key="InvalidSavePath">Invalid save path</v:String>
     <v:String x:Key="SelectDir">Path...</v:String>
     <v:String x:Key="TryUpdateTags">Try update tags (Button 'Update tags' on upper right part of application).</v:String>
+    <v:String x:Key="EmailOrPasswordCannotBeEmpty">Email or password cannot be empty.</v:String>
+    <v:String x:Key="NameCannotBeEmpty">Name cannot be empty.</v:String>
+    <v:String x:Key="NoMeasurements">No measurements</v:String>
+    <v:String x:Key="Period">Period</v:String>
+    <v:String x:Key="TagDuplicationDetected">Tag duplication detected!</v:String>
+    <v:String x:Key="Time">Time</v:String>
+    <v:String x:Key="Date">Date</v:String>
+    <v:String x:Key="Chart">Chart</v:String>
+    <v:String x:Key="Temperature">Temperature</v:String>
+    <v:String x:Key="Humidity">Humidity</v:String>
+    <v:String x:Key="CreateReportFailed">Failed to create report</v:String>
 </ResourceDictionary>
