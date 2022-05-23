@@ -22,8 +22,7 @@
         </Grid.ColumnDefinitions>
         <ListView x:Name="ZoneGroupListView" Margin="2" ItemsSource="{Binding ZoneGroups}" 
                   IsSynchronizedWithCurrentItem="True" 
-                  SelectedItem="{Binding SelectedItem}"
-                                         local:GridViewSort.AutoSort="True">
+                  SelectedItem="{Binding SelectedItem}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" >
@@ -33,7 +32,7 @@
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
-                        <GridViewColumn Header="{DynamicResource ResourceKey=Name}"
+                        <GridViewColumn Header="{Binding ResourceDictionaryService[Name]}"
                                         DisplayMemberBinding="{Binding Name}"
                                         local:GridViewSort.PropertyName="Name" />
                     </GridView.Columns>
@@ -41,9 +40,9 @@
             </ListView.View>
         </ListView>
         <StackPanel Grid.Column="1">
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Add}" Command="{Binding AddCmd}" />
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Edit}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Remove}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
+            <Button Margin="2" Content="{Binding ResourceDictionaryService[Add]}" Command="{Binding AddCmd}" />
+            <Button Margin="2" Content="{Binding ResourceDictionaryService[Edit]}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
+            <Button Margin="2" Content="{Binding ResourceDictionaryService[Remove]}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
         </StackPanel>
     </Grid>
 </Page>

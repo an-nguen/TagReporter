@@ -6,119 +6,132 @@ using System.Linq;
 using System.Reactive;
 using System.Windows;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using TagReporter.Contracts.Repositories;
 using TagReporter.Models;
 using TagReporter.Repositories;
+using TagReporter.Services;
 using TagReporter.Views;
 
-namespace TagReporter.ViewModels
+namespace TagReporter.ViewModels;
+
+public class ZoneGroupEditViewModel : ObservableRecipient
 {
-    public class ZoneGroupEditViewModel : ReactiveObject
+    private readonly IZoneRepository? _zoneRepository;
+    private readonly ZoneGroupRepository? _zoneGroupRepository;
+    public ResourceDictionaryService ResourceDictionaryService { get; private set; }
+
+    public string? Title { get; set; }
+    public string? AddEditBtnContent { get; set; }
+    public string? Name { get; set; }
+
+    private ZoneGroup? _zoneGroup;
+
+    public ObservableCollection<Zone> Zones { get; } = new();
+
+    public ICommand? AddEditCmd { get; set; }
+    public ICommand? CloseCmd { get; set; }
+
+    public ICommand SelectAllCmd { get; }
+    public ICommand DeselectAllCmd { get; }
+
+    public ZoneGroupEditViewModel(IZoneRepository zoneRepository,
+        ZoneGroupRepository zoneGroupRepository,
+        ResourceDictionaryService resourceDictionaryService)
     {
-        private ZoneRepository _zoneRepository { get; } = new();
-        private ZoneGroupRepository _zoneGroupRepository { get; } = new();
+        _zoneRepository = zoneRepository;
+        _zoneGroupRepository = zoneGroupRepository;
+        ResourceDictionaryService = resourceDictionaryService;
+        UpdateZones();
 
-        public string? Title { get; set; }
-        public string? AddEditBtnContent { get; set; }
-        public string? Name { get; set; }
-        private ZoneGroup _zoneGroup;
-
-        public ObservableCollection<Zone> Zones { get; } = new();
-
-        public ReactiveCommand<ZoneGroupEditWindow, Unit> AddEditCmd { get; }
-        public ReactiveCommand<ZoneGroupEditWindow, Unit> CloseCmd { get; }
-
-        public ReactiveCommand<Unit, Unit> SelectAllCmd { get; }
-        public ReactiveCommand<Unit, Unit> DeselectAllCmd { get; }
-
-        public ZoneGroupEditViewModel(EditMode mode, ZoneGroup? group)
+        SelectAllCmd = new RelayCommand(() =>
         {
-            var resource = CommonResources.GetLangResourceDictionary();
+            foreach (var z in Zones)
+                z.IsChecked = true;
+        });
+        DeselectAllCmd = new RelayCommand(() =>
+        {
+            foreach (var z in Zones)
+                z.IsChecked = false;
+        });
+    }
 
-            _zoneRepository.FindAll().ForEach(Zones.Add);
-            _zoneGroup = @group ?? new();
-            Name = _zoneGroup.Name;
+    private async void UpdateZones()
+    {
+        var zones = await _zoneRepository?.FindAllAsync()!;
+        zones.ForEach(Zones.Add);
+    }
 
-            SelectAllCmd = ReactiveCommand.Create(() =>
-            {
-                foreach (var z in Zones)
+    public void SetMode(EditMode mode, ZoneGroup? group)
+    {
+        _zoneGroup = group ?? new ZoneGroup();
+        Name = _zoneGroup.Name;
+
+
+
+        switch (mode)
+        {
+            case EditMode.Edit:
+                Title = AddEditBtnContent = ResourceDictionaryService?["Edit"] ?? "Edit";
+                foreach (var z in _zoneGroup.Zones)
                 {
-                    z.IsChecked = true;
+                    var found = Zones.FirstOrDefault(t => t.Id == z.Id);
+                    if (found != null) found.IsChecked = true;
                 }
-            });
-            DeselectAllCmd = ReactiveCommand.Create(() =>
-            {
-                foreach (var z in Zones)
+                AddEditCmd = new RelayCommand(() =>
                 {
-                    z.IsChecked = false;
-                }
-            });
-
-            CloseCmd = ReactiveCommand.Create<ZoneGroupEditWindow>((wnd) => wnd.Close());
-
-            switch (mode)
-            {
-                case EditMode.Edit:
-                    Title = AddEditBtnContent = resource["Edit"].ToString() ?? "Edit";
-                    foreach (var z in _zoneGroup.Zones)
+                    if (string.IsNullOrEmpty(Name))
                     {
-                        var found = Zones.FirstOrDefault(t => t.Uuid == z.Uuid);
-                        if (found != null) found.IsChecked = true;
+                        MessageBox.Show($"{ResourceDictionaryService?["NameEmptyError"] ?? "NameEmptyError"}!", "Error", MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
                     }
-                    AddEditCmd = ReactiveCommand.Create<ZoneGroupEditWindow>((wnd) =>
+                    try
                     {
-                        if (string.IsNullOrEmpty(Name))
+                        _zoneGroupRepository?.Update(_zoneGroup, new ZoneGroup
                         {
-                            MessageBox.Show($"{resource["NameEmptyError"].ToString() ?? "NameEmptyError"}!", "Error", MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                            return;
-                        }
-                        try
-                        {
-                            _zoneGroupRepository.Update(_zoneGroup, new ZoneGroup()
-                            {
-                                Name = Name,
-                                Zones = Zones.Where(z => z.IsChecked).ToList()
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-
-                        wnd.Close();
-                    });
-                    break;
-                case EditMode.Create:
-                    Title = AddEditBtnContent = resource["Add"].ToString() ?? "Add";
-                    AddEditCmd = ReactiveCommand.Create<ZoneGroupEditWindow>((wnd) =>
+                            Name = Name,
+                            Zones = Zones.Where(z => z.IsChecked).ToList()
+                        });
+                    }
+                    catch (Exception ex)
                     {
-                        if (string.IsNullOrEmpty(Name))
-                        {
-                            MessageBox.Show($"{resource["NameEmptyError"].ToString() ?? "NameEmptyError"}!", "Error", MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                            return;
-                        }
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    CloseCmd?.Execute(null);
+                });
+                break;
+            case EditMode.Create:
+                Title = AddEditBtnContent = ResourceDictionaryService?["Add"] ?? "Add";
+                AddEditCmd = new RelayCommand(() =>
+                {
+                    if (string.IsNullOrEmpty(Name))
+                    {
+                        MessageBox.Show($"{ResourceDictionaryService?["NameEmptyError"] ?? "NameEmptyError"}!", "Error", MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
+                    }
 
-                        try
+                    try
+                    {
+                        _zoneGroupRepository?.Create(new ZoneGroup()
                         {
-                            _zoneGroupRepository.Create(new ZoneGroup()
-                            {
-                                Name = Name,
-                                Zones = Zones.Where(z => z.IsChecked).ToList()
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                        }
+                            Name = Name,
+                            Zones = Zones.Where(z => z.IsChecked).ToList()
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
 
-                        wnd.Close();
-                    });
-                    break;
-                default:
-                    throw new Exception("Illegal mode!");
-            }
+                    CloseCmd?.Execute(null);
+                });
+                break;
+            default:
+                throw new Exception("Illegal mode!");
         }
     }
 }

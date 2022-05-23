@@ -1,29 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using LiteDB;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using ReactiveUI;
 
-namespace TagReporter.Models
+namespace TagReporter.Models;
+
+public class Zone: ReactiveObject
 {
-    public class Zone: ReactiveObject
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    [NotMapped] public List<Tag> Tags { get; set; } = new List<Tag>();
+
+    [NotMapped]
+    private bool _isChecked;
+
+    [NotMapped]
+    public bool IsChecked
     {
-        private bool _isChecked;
-
-        [BsonIgnore]
-        public bool IsChecked
-        {
-            get => _isChecked;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _isChecked, value);
-            }
-        }
-
-        [BsonIgnore] public List<Tag> Tags { get; set; } = new List<Tag>();
-
-        [BsonId(true)]
-        public Guid Uuid { get; set; }
-        public string? Name { get; set; }
-
+        get => _isChecked;
+        set => this.RaiseAndSetIfChanged(ref _isChecked, value);
     }
+
+    [NotMapped]
+    public List<Guid> TagUuids { get; set; } = new();
 }

@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using LiteDB;
 
-namespace TagReporter.Models
+namespace TagReporter.Models;
+
+public class ZoneGroup
 {
-    public class ZoneGroup
-    {
-        [BsonId(true)]
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        [BsonRef("zones")]
-        public List<Zone> Zones { get; set; } = new();
-    }
+    [BsonId(true)]
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    [BsonRef("zones")]
+    public List<Zone> Zones { get; set; } = new();
 }

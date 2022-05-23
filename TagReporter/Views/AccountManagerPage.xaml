@@ -10,7 +10,6 @@
     <Page.Resources>
         <ResourceDictionary x:Name="PageResourceDictionary">
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/lang.en-US.xaml" />
                 <ResourceDictionary Source="Resources/style.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -22,8 +21,7 @@
         </Grid.ColumnDefinitions>
         <ListView x:Name="AccountListView" Margin="2" ItemsSource="{Binding Accounts}"
                   SelectedItem="{Binding SelectedAccount}"
-                  IsSynchronizedWithCurrentItem="True" 
-                                         local:GridViewSort.AutoSort="True">
+                  IsSynchronizedWithCurrentItem="True">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" >
@@ -33,10 +31,10 @@
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
-                        <GridViewColumn Header="{DynamicResource Email}"
+                        <GridViewColumn Header="{Binding Path=ResourceDictionaryService[Email]}"
                                         DisplayMemberBinding="{Binding Email}"
                                         local:GridViewSort.PropertyName="Email" />
-                        <GridViewColumn Header="{DynamicResource Password}" 
+                        <GridViewColumn Header="{Binding Path=ResourceDictionaryService[Password]}" 
                                         DisplayMemberBinding="{Binding Password}"
                                         local:GridViewSort.PropertyName="Password" />
                     </GridView.Columns>
@@ -44,9 +42,9 @@
             </ListView.View>
         </ListView>
         <StackPanel Grid.Column="1">
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Add}" Command="{Binding AddCmd}" />
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Edit}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Remove}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
+            <Button Margin="2" Content="{Binding Path=ResourceDictionaryService[Add]}" Command="{Binding AddCmd}" />
+            <Button Margin="2" Content="{Binding Path=ResourceDictionaryService[Edit]}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
+            <Button Margin="2" Content="{Binding Path=ResourceDictionaryService[Remove]}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
         </StackPanel>
     </Grid>
 </Page>

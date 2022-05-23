@@ -21,7 +21,7 @@
             <RowDefinition Height="48" />
         </Grid.RowDefinitions>
         <StackPanel Margin="5" Orientation="Vertical">
-            <TextBlock Margin="0, 2" Text="{DynamicResource Name}" />
+            <TextBlock Margin="0, 2" Text="{Binding ResourceDictionaryService[Name]}" />
             <TextBox Text="{Binding Name}" />
         </StackPanel>
         <Grid  Grid.Row="1">
@@ -43,12 +43,12 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="{DynamicResource Name}" DisplayMemberBinding="{Binding Name}" local:GridViewSort.PropertyName="Name" />
+                        <GridViewColumn Header="{Binding ResourceDictionaryService[Name]}" DisplayMemberBinding="{Binding Name}" local:GridViewSort.PropertyName="Name" />
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Button Margin="5, 0" Grid.Row="1" Content="{DynamicResource SelectAll}" Command="{Binding SelectAllCmd}" />
-            <Button Margin="5, 0" Grid.Row="1" Grid.Column="1" Content="{DynamicResource DeselectAll}" Command="{Binding DeselectAllCmd}" />
+            <Button Margin="5, 0" Grid.Row="1" Content="{Binding ResourceDictionaryService[SelectAll]}" Command="{Binding SelectAllCmd}" />
+            <Button Margin="5, 0" Grid.Row="1" Grid.Column="1" Content="{Binding ResourceDictionaryService[DeselectAll]}" Command="{Binding DeselectAllCmd}" />
         </Grid>
 
         <Grid Grid.Row="2">
@@ -57,7 +57,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Button x:Name="AddEditBtn" Height="24" Margin="5, 0" Content="{Binding AddEditBtnContent}" Command="{Binding AddEditCmd}" />
-            <Button x:Name="CloseBtn" Grid.Column="1" Height="24" Margin="5, 0" Content="{DynamicResource Close}" Command="{Binding CloseCmd}" />
+            <Button x:Name="CloseBtn" Grid.Column="1" Height="24" Margin="5, 0" Content="{Binding ResourceDictionaryService[Close]}" Command="{Binding CloseCmd}" />
         </Grid>
 
     </Grid>

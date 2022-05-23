@@ -1,74 +1,88 @@
-﻿using ReactiveUI;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using TagReporter.Contracts.Repositories;
+using TagReporter.Contracts.Services;
 using TagReporter.Models;
-using TagReporter.Repositories;
+using TagReporter.Services;
 using TagReporter.Views;
 
-namespace TagReporter.ViewModels
+namespace TagReporter.ViewModels;
+
+public class ZoneMgrViewModel : ObservableRecipient
 {
-    public class ZoneMgrViewModel : ReactiveObject
+    private readonly IZoneRepository _zoneRepository;
+    private readonly IZoneEditWindowFactory _zoneEditWindowFactory;
+    public ResourceDictionaryService ResourceDictionaryService { get; }
+
+    public ObservableCollection<Zone> Zones { get; } = new();
+
+    private Zone? _selectedItem;
+    private readonly StatusBarService _statusBarService;
+
+    public Zone? SelectedItem
     {
-        private readonly ZoneRepository _zoneRepository = new();
-
-        public ObservableCollection<Zone> Zones { get; } = new();
-
-        private Zone? _selectedItem;
-        public Zone? SelectedItem
+        get => _selectedItem;
+        set
         {
-            get => _selectedItem;
-            set
-            {
-                _selectedItem = value;
-
-                this.RaiseAndSetIfChanged(ref _selectedItem, value);
-                this.RaisePropertyChanged(nameof(IsSelected));
-            }
+            SetProperty(ref _selectedItem, value);
+            OnPropertyChanged(nameof(IsSelected));
         }
-        public bool IsSelected { get => _selectedItem != null; }
+    }
 
-        public ReactiveCommand<Unit, Unit>? AddCmd { get; }
-        public ReactiveCommand<Unit, Unit>? EditCmd { get; }
-        public ReactiveCommand<Unit, Unit>? RemoveCmd { get; }
+    public bool IsSelected => SelectedItem != null;
 
+    public ICommand AddCmd { get; }
+    public ICommand EditCmd { get; }
+    public ICommand RemoveCmd { get; }
 
-        public void UpdateZones()
+    public async void UpdateZones()
+    {
+        Zones.Clear();
+        _statusBarService.Loading = true;
+        var zones = await _zoneRepository.FindAllAsync();
+        zones.ForEach(Zones.Add);
+        _statusBarService.Loading = false;
+    }
+
+    public ZoneMgrViewModel(IZoneRepository zoneRepository, 
+        IZoneEditWindowFactory zoneEditWindowFactory,
+        ResourceDictionaryService resourceDictionaryService,
+        StatusBarService statusBarService)
+    {
+        _zoneRepository = zoneRepository;
+        _zoneEditWindowFactory = zoneEditWindowFactory;
+        ResourceDictionaryService = resourceDictionaryService;
+        _statusBarService = statusBarService;
+        UpdateZones();
+        AddCmd = new RelayCommand(() =>
         {
-            Zones.Clear();
-            _zoneRepository.FindAll().ToList().ForEach(Zones.Add);
-        }
+            ShowEditDialog(EditMode.Create);
 
-        public ZoneMgrViewModel()
+        });
+        EditCmd = new RelayCommand(() =>
+        {
+            ShowEditDialog(EditMode.Edit, SelectedItem);
+        });
+        RemoveCmd = new RelayCommand(() =>
+        {
+            if (SelectedItem == null) return;
+            _zoneRepository.Delete(SelectedItem.Id);
+            UpdateZones();
+        });
+    }
+
+    public void ShowEditDialog(EditMode mode, Zone? zone = null)
+    {
+        if (zone != null)
+            zone.TagUuids = _zoneRepository.FindTagUuidsByZone(zone);
+        var window = _zoneEditWindowFactory.Create(mode, zone);
+        window.ViewModel.CloseCmd = new RelayCommand(() =>
         {
             UpdateZones();
-            AddCmd = ReactiveCommand.Create(() => {
-                ShowEditDialog(EditMode.Create);
-
-            });
-            EditCmd = ReactiveCommand.Create(() => {
-                ShowEditDialog(EditMode.Edit, SelectedItem);
-            });
-            RemoveCmd = ReactiveCommand.Create(() =>
-            {
-                if (SelectedItem != null)
-                {
-                    _zoneRepository.Delete(SelectedItem);
-                    UpdateZones();
-                }
-            });
-        }
-
-        public void ShowEditDialog(EditMode mode, Zone? zone = null)
-        {
-            var wnd = new ZoneEditWindow(mode, zone);
-            wnd.GetResourceDictionary().MergedDictionaries.Clear();
-            wnd.GetResourceDictionary().MergedDictionaries.Add(CommonResources.GetLangResourceDictionary());
-            wnd.ViewModel!.AddEditCmd.Subscribe(_ => {
-                UpdateZones();
-            });
-            wnd.ShowDialog();
-        }
+            window.Close();
+        });
+        window.ShowDialog();
     }
 }

@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TagReporter.Views"
         mc:Ignorable="d"
+        KeyDown="OnKeyDown"
         Title="{Binding Title}" Height="450" Width="800">
     <Window.Resources>
         <ResourceDictionary x:Name="WindowResourceDictionary">
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/lang.en-US.xaml" />
                 <ResourceDictionary Source="Resources/style.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -21,7 +21,7 @@
             <RowDefinition Height="48" />
         </Grid.RowDefinitions>
         <StackPanel Margin="5" Orientation="Vertical">
-            <TextBlock Margin="0, 2" Text="{DynamicResource Name}" />
+            <TextBlock Margin="0, 2" Text="{Binding ResourceDictionaryService[Name]}" />
             <TextBox x:Name="ZoneNameTextBox" Text="{Binding Name}" />
         </StackPanel>
         <Grid  Grid.Row="1">
@@ -33,23 +33,15 @@
                 <RowDefinition />
                 <RowDefinition Height="28" />
             </Grid.RowDefinitions>
-            <ListView Grid.ColumnSpan="2" ItemsSource="{Binding Tags}" Margin="5"  local:GridViewSort.AutoSort="True">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn>
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsChecked}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="{DynamicResource Tag}" DisplayMemberBinding="{Binding Name}" local:GridViewSort.PropertyName="Name" />
-                        <GridViewColumn Header="{DynamicResource Manager}" DisplayMemberBinding="{Binding TagManagerName}" local:GridViewSort.PropertyName="TagManagerName"  />
-                    </GridView>
-                </ListView.View>
-            </ListView>
-            <Button Margin="5, 0" Grid.Row="1" Content="{DynamicResource SelectAll}" Command="{Binding SelectAllCmd}" />
-            <Button Margin="5, 0" Grid.Row="1" Grid.Column="1" Content="{DynamicResource DeselectAll}" Command="{Binding DeselectAllCmd}" />
+            <DataGrid Grid.ColumnSpan="2" AutoGenerateColumns="False" ItemsSource="{Binding Tags}" Margin="5">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Binding="{Binding Path=IsChecked}"></DataGridCheckBoxColumn>
+                    <DataGridTextColumn Header="{Binding ResourceDictionaryService[Tag]}" Binding="{Binding Path=Name}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="{Binding ResourceDictionaryService[Manager]}" Binding="{Binding Path=TagManagerName}"></DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Button Margin="5, 0" Grid.Row="1" Content="{Binding ResourceDictionaryService[SelectAll]}" Command="{Binding SelectAllCmd}" />
+            <Button Margin="5, 0" Grid.Row="1" Grid.Column="1" Content="{Binding ResourceDictionaryService[DeselectAll]}" Command="{Binding DeselectAllCmd}" />
         </Grid>
         
         <Grid Grid.Row="2">
@@ -57,8 +49,8 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button x:Name="AddEditBtn" Height="24" Margin="5, 0" Content="{Binding AddEditBtnContent}" />
-            <Button x:Name="CloseBtn" Grid.Column="1" Height="24" Margin="5, 0" Content="{DynamicResource Close}" />
+            <Button x:Name="AddEditBtn" Height="24" Margin="5, 0" Content="{Binding AddEditBtnContent}" Command="{Binding AddEditCmd}" />
+            <Button x:Name="CloseBtn" Grid.Column="1" Height="24" Margin="5, 0" Content="{DynamicResource Close}"  Command="{Binding CloseCmd}" />
         </Grid>
 
     </Grid>

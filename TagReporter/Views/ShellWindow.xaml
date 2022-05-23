@@ -1,4 +1,4 @@
-﻿<Window x:Class="TagReporter.Views.MainWindow"
+﻿<Window x:Class="TagReporter.Views.ShellWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,7 +8,6 @@
     <Window.Resources>
         <ResourceDictionary x:Name="MainWindowResourceDictionary">
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/lang.en-US.xaml" />
                 <ResourceDictionary Source="Resources/style.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -20,56 +19,56 @@
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
         <StackPanel  Grid.Row="0" HorizontalAlignment="Left" Orientation="Horizontal">
-            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding NavigationService.Frame.CanGoBack}" Command="{Binding GoBackCmd}">
+            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding CanGoBack}" Command="{Binding GoBackCmd}">
                 <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_arrow_left_24_regular.png"></Image>
             </Button>
-            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding NavigationService.Frame.CanGoForward}" Command="{Binding GoForwardCmd}">
+            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding CanGoForward}" Command="{Binding GoForwardCmd}">
                 <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_arrow_right_24_regular.png"></Image>
             </Button>
         </StackPanel>
 
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" Orientation="Horizontal">
-            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenReportFormPageCommand}">
+            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenReportFormPageCommand}" IsEnabled="{Binding StatusBarService.IsNotLoading}">
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_document_24_regular.png"></Image>
-                    <TextBlock  VerticalAlignment="Center" Text="{DynamicResource Reports}" />
+                    <TextBlock  VerticalAlignment="Center" Text="{Binding ResourceDictionaryService[Reports]}" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenAccountMgrPageCommand}">
+            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenAccountMgrPageCommand}" IsEnabled="{Binding StatusBarService.IsNotLoading}">
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_person_24_regular.png"></Image>
-                    <TextBlock  VerticalAlignment="Center" Text="{DynamicResource Accounts}" />
+                    <TextBlock  VerticalAlignment="Center" Text="{Binding ResourceDictionaryService[Accounts]}" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenZoneMgrPageCommand}">
+            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenZoneMgrPageCommand}" IsEnabled="{Binding StatusBarService.IsNotLoading}">
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_border_24_regular.png"></Image>
-                    <TextBlock  VerticalAlignment="Center" Text="{DynamicResource Zones}" />
+                    <TextBlock  VerticalAlignment="Center" Text="{Binding ResourceDictionaryService[Zones]}" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenZoneGroupMgrPageCommand}">
+            <Button Style="{StaticResource NavBtn}" Command="{Binding OpenZoneGroupMgrPageCommand}" IsEnabled="{Binding StatusBarService.IsNotLoading}" >
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_group_24_regular.png"></Image>
-                    <TextBlock  VerticalAlignment="Center" Text="{DynamicResource ZoneGroups}" />
+                    <TextBlock  VerticalAlignment="Center" Text="{Binding ResourceDictionaryService[ZoneGroups]}" />
                 </StackPanel>
             </Button>
         </StackPanel>
         <StackPanel HorizontalAlignment="Right"  Orientation="Horizontal">
-            <Button Style="{StaticResource NavBtn}" Command="{Binding SyncTagsFromCloudCmd}">
+            <Button Style="{StaticResource NavBtn}" Command="{Binding SyncTagsFromCloudCmd}" IsEnabled="{Binding StatusBarService.IsNotLoading}">
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                     <Image Width="16" Height="16" Source="pack://application:,,,/Resources/ic_fluent_arrow_sync_24_regular.png"></Image>
-                    <TextBlock VerticalAlignment="Center" Text="{DynamicResource SyncTags}"/>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding ResourceDictionaryService[SyncTags]}"/>
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavBtn}" Width="24" Command="{Binding OpenSettingsPageCmd}">
+            <Button Style="{StaticResource NavBtn}" Width="24" Command="{Binding OpenSettingsPageCmd}" IsEnabled="{Binding StatusBarService.IsNotLoading}">
                 <Image Width="16" Height="16" Source="pack://application:,,,/Resources/ic_fluent_settings_24_regular.png"></Image>
             </Button>
         </StackPanel>
-        <Frame NavigationUIVisibility="Hidden" Grid.Row="1" Height="Auto" Margin="5" x:Name="ContentFrame" />
+        <Frame NavigationUIVisibility="Hidden" Grid.Row="1" Height="Auto" Margin="5" x:Name="shellFrame" />
         <StatusBar Grid.Row="2">
             <DockPanel>
-                <TextBlock MinWidth="240" Height="21" Grid.Column="0"  Text="{Binding StatusBarResource.StatusBarStringContent}"></TextBlock>
-                <ProgressBar Width="100" Height="16" Grid.Column="1" HorizontalAlignment="Right" IsIndeterminate="{Binding StatusBarResource.StatusBarLoading}"></ProgressBar>
+                <TextBlock MinWidth="240" Height="21" Text="{Binding StatusBarService.Content}"></TextBlock>
+                <ProgressBar Width="100" Height="16" HorizontalAlignment="Right" IsIndeterminate="{Binding StatusBarService.Loading}"></ProgressBar>
             </DockPanel>
         </StatusBar>
     </Grid>

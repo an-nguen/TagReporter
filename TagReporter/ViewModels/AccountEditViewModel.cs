@@ -1,84 +1,90 @@
-﻿using ReactiveUI;
-using System;
-using System.Reactive;
+﻿using System;
 using System.Windows;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using TagReporter.Contracts.Repositories;
 using TagReporter.Models;
-using TagReporter.Repositories;
+using TagReporter.Services;
 using TagReporter.Views;
 
-namespace TagReporter.ViewModels
+namespace TagReporter.ViewModels;
+
+public class AccountEditViewModel : ObservableRecipient
 {
-    public class AccountEditViewModel: ReactiveObject
+    private readonly IAccountRepository _accountRepository;
+    public ResourceDictionaryService ResourceDictionaryService { get; }
+
+    public string? Title { get; set; }
+    public string? AddEditBtnContent { get; set; }
+
+    public string? Email { get; set; }
+    public string? Password { get; set; }
+    private WstAccount? _account;
+
+    public IRelayCommand? AddEditCommand { get; set; }
+    public IRelayCommand? CloseCommand { get; set; }
+
+    public AccountEditViewModel(IAccountRepository accountRepository, ResourceDictionaryService resourceDictionaryService)
     {
-        private AccountRepository _accountRepository { get; } = new();
+        _accountRepository = accountRepository;
+        ResourceDictionaryService = resourceDictionaryService;
+    }
 
-        public string? Title { get; set; }
-        public string? AddEditBtnContent { get; set; }
-        
-        public string? Email { get; set; }
-        public string? Password { get; set; }
-        private Account? _account;
+    public void SetMode(EditMode mode, WstAccount? account)
+    {
+        _account = account ?? new WstAccount();
 
-        public ReactiveCommand<AccountEditWindow, Unit> AddEditCommand { get; }
-        public ReactiveCommand<AccountEditWindow, Unit> CloseCommand { get; }
-
-        public AccountEditViewModel(EditMode mode, Account? account)
+        switch (mode)
         {
-            var resource = CommonResources.GetLangResourceDictionary();
-            _account = account ?? new Account();
-            CloseCommand = ReactiveCommand.Create<AccountEditWindow>((wnd) => wnd.Close());
-
-            switch (mode)
-            {
-                case EditMode.Edit:
-                    Title = AddEditBtnContent = resource["Edit"].ToString() ?? "Edit";
-                    Email = _account.Email;
-                    Password = _account.Password;
-                    AddEditCommand = ReactiveCommand.Create<AccountEditWindow>((wnd) =>
+            case EditMode.Edit:
+                Title = AddEditBtnContent = ResourceDictionaryService["Edit"] ?? "Edit";
+                Email = _account.Email;
+                Password = _account.Password;
+                AddEditCommand = new RelayCommand(() =>
+                {
+                    if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
                     {
-                        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
-                        {
-                            MessageBox.Show(
-                                $"{resource["EmailOrPasswordCannotBeEmpty"].ToString() ?? "EmailOrPasswordCannotBeEmpty"}",
-                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        try
-                        {
-                            _accountRepository.Update(_account, new Account(Email!, Password!));
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                        wnd.Close();
-                    });
-                    break;
-                case EditMode.Create:
-                    Title = AddEditBtnContent = resource["Add"].ToString() ?? "Add";
-                    AddEditCommand = ReactiveCommand.Create<AccountEditWindow>((wnd) =>
+                        MessageBox.Show(
+                            $"{ResourceDictionaryService["EmailOrPasswordCannotBeEmpty"] ?? "EmailOrPasswordCannotBeEmpty"}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                    try
                     {
-                        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
-                        {
-                            MessageBox.Show(
-                                $"{resource["EmailOrPasswordCannotBeEmpty"].ToString() ?? "EmailOrPasswordCannotBeEmpty"}",
-                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        try
-                        {
-                            _accountRepository.Create(new Account(Email!, Password!));
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                        wnd.Close();
-                    });
-                    break;
-                default:
-                    throw new Exception("Illegal mode!");
-            }
+                        _accountRepository.Update(Email, new WstAccount(Email!, Password!));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    CloseCommand?.Execute(null);
+                });
+                break;
+            case EditMode.Create:
+                Title = AddEditBtnContent = ResourceDictionaryService["Add"] ?? "Add";
+                AddEditCommand = new RelayCommand(() =>
+                {
+                    if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+                    {
+                        MessageBox.Show(
+                            $"{ResourceDictionaryService["EmailOrPasswordCannotBeEmpty"] ?? "EmailOrPasswordCannotBeEmpty"}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                    try
+                    {
+                        _accountRepository.Create(new WstAccount(Email!, Password!));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    CloseCommand?.Execute(null);
+                });
+                break;
+            default:
+                throw new Exception("Illegal mode!");
         }
     }
 }

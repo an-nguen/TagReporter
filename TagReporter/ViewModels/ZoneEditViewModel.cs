@@ -1,144 +1,136 @@
-﻿using ReactiveUI;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using TagReporter.Contracts.Repositories;
 using TagReporter.Models;
-using TagReporter.Repositories;
+using TagReporter.Services;
 using TagReporter.Views;
 
-namespace TagReporter.ViewModels
+namespace TagReporter.ViewModels;
+
+public class ZoneEditViewModel: ObservableRecipient
 {
-    public class ZoneEditViewModel: ReactiveObject
+    private readonly IZoneRepository? _zoneRepository;
+    private readonly ITagRepository? _tagRepository;
+    public ResourceDictionaryService? ResourceDictionaryService { get; }
+
+    public string Title { get; set; } = string.Empty;
+    public string? AddEditBtnContent { get; set; }
+    public string? Name { get; set; }
+    private Zone? _zone;
+
+    public ObservableCollection<Tag> Tags { get; } = new();
+
+    public ICommand? AddEditCmd { get; set; }
+    public ICommand? CloseCmd { get; set; }
+
+    public ICommand SelectAllCmd { get; }
+    public ICommand DeselectAllCmd { get; }
+
+    public ZoneEditViewModel(IServiceProvider serviceProvider)
     {
-        private ZoneRepository _zoneRepository { get; } = new();
-        private ZoneTagRepository _zoneTagRepository { get; } = new();
-        private TagRepository _tagRepository { get; } = new();
+        if (serviceProvider.GetService(typeof(IZoneRepository)) is IZoneRepository zoneRepository)
+            _zoneRepository = zoneRepository;
 
-        public string Title { get; set; } = String.Empty;
-        public string AddEditBtnContent { get; set; } = String.Empty;
-        public string? Name { get; set; }
-        private Zone _zone;
+        if (serviceProvider.GetService(typeof(ITagRepository)) is ITagRepository tagRepository)
+            _tagRepository = tagRepository;
 
-        public ObservableCollection<Tag> Tags { get; } = new();
+        if (serviceProvider.GetService(typeof(ResourceDictionaryService)) is ResourceDictionaryService
+            resourceDictionaryService)
+            ResourceDictionaryService = resourceDictionaryService;
 
-        public ReactiveCommand<ZoneEditWindow, Unit> AddEditCmd { get; }
-        public ReactiveCommand<ZoneEditWindow, Unit> CloseCmd { get; }
 
-        public ReactiveCommand<Unit, Unit> SelectAllCmd { get; }
-        public ReactiveCommand<Unit, Unit> DeselectAllCmd { get; }
-
-        public ZoneEditViewModel(EditMode mode, Zone? zone)
+        SelectAllCmd = new RelayCommand(() =>
         {
-            var resource = CommonResources.GetLangResourceDictionary();
-
-            _tagRepository.FindAll().ForEach(Tags.Add);
-            _zone = zone ?? new();
-            Name = _zone.Name;
-
-            SelectAllCmd = ReactiveCommand.Create(() =>
-            {
-                foreach (var tag in Tags)
-                {
-                    tag.IsChecked = true;
-                }  
-            });
-            DeselectAllCmd = ReactiveCommand.Create(() =>
-            {
-                foreach (var tag in Tags)
-                {
-                    tag.IsChecked = false;
-                }
-            });
-            CloseCmd = ReactiveCommand.Create<ZoneEditWindow>((wnd) => wnd.Close());
-
-            switch (mode)
-            {
-                case EditMode.Edit:
-                    Title = AddEditBtnContent = resource["Edit"].ToString() ?? "Edit";
-                    var tags = _tagRepository.FindTagsByZone(_zone);
-                    foreach (var tag in tags)
-                    {
-                        var found = Tags.First(t => t.Uuid == tag.Uuid);
-                        found.IsChecked = true;
-                    }
-                    AddEditCmd = ReactiveCommand.Create<ZoneEditWindow>((wnd) =>
-                    {
-                        if (string.IsNullOrEmpty(Name))
-                        {
-                            MessageBox.Show($"{resource["NameCannotBeEmpty"].ToString() ?? "NameCannotBeEmpty"}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        try
-                        {
-                            _zoneRepository.Update(_zone, new()
-                            {
-                                Name = Name
-                            });
-                            var zoneTagList = _zoneTagRepository.Query().Where(zt => zt.ZoneUuid == _zone.Uuid).ToList();
-                            zoneTagList.ForEach(zt => _zoneTagRepository.Delete(zt));
-                            Tags.Where(t => t.IsChecked).ToList().ForEach(t =>
-                            {
-                                if (t.IsChecked)
-                                {
-                                    _zoneTagRepository.Create(new ZoneTag()
-                                    {
-                                        TagUuid = t.Uuid,
-                                        ZoneUuid = _zone.Uuid
-                                    });
-                                }
-                            });
-                        } catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-
-                        wnd.Close();
-                    });
-                    break;
-                case EditMode.Create:
-                    Title = AddEditBtnContent = resource["Add"].ToString() ?? "Add";
-                    AddEditCmd = ReactiveCommand.Create<ZoneEditWindow>((wnd) =>
-                    {
-                        if (string.IsNullOrEmpty(Name))
-                        {
-                            MessageBox.Show($"{resource["NameCannotBeEmpty"].ToString() ?? "NameCannotBeEmpty"}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        try
-                        {
-                            var uuid = _zoneRepository.Create(new Zone()
-                            {
-                                Name = Name
-                            }).AsGuid;
-                            Tags.Where(t => t.IsChecked).ToList().ForEach(t =>
-                            {
-                                if (t.IsChecked)
-                                {
-                                    _zoneTagRepository.Create(new ZoneTag()
-                                    {
-                                        TagUuid = t.Uuid,
-                                        ZoneUuid = uuid
-                                    });
-                                }
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-
-                        wnd.Close();
-                    });
-                    break;
-                default:
-                    throw new Exception("Illegal mode!");
-            }
-
-        }
+            foreach (var tag in Tags)
+                tag.IsChecked = true;
+        });
+        DeselectAllCmd = new RelayCommand(() =>
+        {
+            foreach (var tag in Tags)
+                tag.IsChecked = false;
+        });
+        UpdateTags();
     }
+
+    public void SetMode(EditMode mode, Zone? zone)
+    {
+        _zone = zone;
+        Name = _zone?.Name;
+
+        switch (mode)
+        {
+            case EditMode.Edit:
+                Title = AddEditBtnContent = ResourceDictionaryService?["Edit"] ?? "Edit";
+                foreach (var found in Tags.Where(t => _zone!.TagUuids.Contains(t.Uuid)))
+                    found.IsChecked = true;
+
+                AddEditCmd = new RelayCommand(() =>
+                {
+                    if (string.IsNullOrEmpty(Name))
+                    {
+                        MessageBox.Show($"{ResourceDictionaryService?["NameCannotBeEmpty"] ?? "NameCannotBeEmpty"}", "Error",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    try
+                    {
+                        _zoneRepository?.Update(_zone!.Id, new Zone
+                        {
+                            Name = Name,
+                            TagUuids = Tags.Where(t => t.IsChecked).Select(t => t.Uuid).ToList()
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }  
+                    CloseCmd?.Execute(null);
+                });
+                break;
+            case EditMode.Create:
+                Title = AddEditBtnContent = ResourceDictionaryService?["Add"] ?? "Add";
+                AddEditCmd = new RelayCommand(() =>
+                {
+                    if (string.IsNullOrEmpty(Name))
+                    {
+                        MessageBox.Show($"{ResourceDictionaryService?["NameCannotBeEmpty"] ?? "NameCannotBeEmpty"}", "Error",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    try
+                    {
+                        _zoneRepository?.Create(new Zone
+                        {
+                            Name = Name,
+                            TagUuids = Tags.Where(t => t.IsChecked).Select(t => t.Uuid).ToList(),
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    CloseCmd?.Execute(null);
+                });
+                break;
+            default:
+                throw new Exception("Illegal mode!");
+        }
+
+    }
+
+    private void UpdateTags()
+    {
+        var tags = _tagRepository?.FindAll()!;
+        tags.ForEach(Tags.Add);
+    }
+
 }

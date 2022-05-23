@@ -10,7 +10,6 @@
     <Page.Resources>
         <ResourceDictionary x:Name="PageResourceDictionary">
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/lang.en-US.xaml" />
                 <ResourceDictionary Source="Resources/style.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -33,7 +32,7 @@
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
-                        <GridViewColumn Header="{DynamicResource ResourceKey=Name}"
+                        <GridViewColumn Header="{Binding Path=ResourceDictionaryService[Name]}"
                                         DisplayMemberBinding="{Binding Name}"
                                         local:GridViewSort.PropertyName="Name" />
                     </GridView.Columns>
@@ -41,9 +40,9 @@
             </ListView.View>
         </ListView>
         <StackPanel Grid.Column="1">
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Add}" Command="{Binding AddCmd}" />
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Edit}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
-            <Button Margin="2" Content="{DynamicResource ResourceKey=Remove}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
+            <Button Margin="2" Content="{Binding Path=ResourceDictionaryService[Add]}" Command="{Binding AddCmd}" />
+            <Button Margin="2" Content="{Binding Path=ResourceDictionaryService[Edit]}" IsEnabled="{Binding IsSelected}" Command="{Binding EditCmd}" />
+            <Button Margin="2" Content="{Binding Path=ResourceDictionaryService[Remove]}" IsEnabled="{Binding IsSelected}" Command="{Binding RemoveCmd}" />
         </StackPanel>
     </Grid>
 </Page>

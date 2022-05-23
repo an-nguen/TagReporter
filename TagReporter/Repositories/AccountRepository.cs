@@ -1,30 +1,51 @@
-﻿using LiteDB;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TagReporter.Contracts.Repositories;
 using TagReporter.Models;
 
-namespace TagReporter.Repositories
+namespace TagReporter.Repositories;
+
+public class AccountRepository: IAccountRepository
 {
-    public class AccountRepository: BaseRepository<Account>
+    private readonly AppContext _context;
+
+    public AccountRepository(AppContext appContext)
     {
-        public AccountRepository() : base("account", CommonResources.ConnectionString)
-        {
+        _context = appContext;
+    }
+    public List<WstAccount> FindAll() => _context.WstAccounts.ToList();
 
-        }
+    public async Task<List<WstAccount>> FindAllAsync() => await _context.WstAccounts.ToListAsync();
 
-        public new bool Update(Account objDb, Account obj)
-        {
-            using var db = new LiteDatabase(ConnString);
-            var collection = db.GetCollection<Account>(TableName);
-            objDb.Email = obj.Email;
-            objDb.Password = obj.Password;
+    public async Task Create(WstAccount account)
+    {
+        if (string.IsNullOrEmpty(account.Email) || string.IsNullOrEmpty(account.Password)) 
+            throw new Exception("Account email or password cannot be empty or null");
+        await _context.AddAsync(account);
+        await _context.SaveChangesAsync();
+    }
 
-            return collection.Update(objDb);
-        }
+    public async Task Update(string email, WstAccount account)
+    {
+        if (string.IsNullOrEmpty(account.Email) || string.IsNullOrEmpty(account.Password) || string.IsNullOrEmpty(email)) 
+            throw new Exception("Account email or password cannot be empty or null");
+        var dbAccount = await _context.WstAccounts.FindAsync(email);
+        if (dbAccount == null) throw new Exception($"Account with email = {email} not found");
+        dbAccount.Email = account.Email;
+        dbAccount.Password = account.Password;
+        _context.Update(dbAccount);
+        await _context.SaveChangesAsync();
+    }
 
-        public new bool Delete(Account tag)
-        {
-            using var db = new LiteDatabase(ConnString);
-            var collection = db.GetCollection<Account>(TableName);
-            return collection.Delete(tag.Id);
-        }
+    public async Task Delete(string email)
+    {
+        var account = await _context.WstAccounts.FindAsync(email);
+        if (account == null)
+            throw new Exception("[Delete] Account not found");
+        _context.WstAccounts.Remove(account);
+        await _context.SaveChangesAsync();
     }
 }

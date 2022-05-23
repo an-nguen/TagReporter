@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagReporter.Views
+namespace TagReporter.Helpers;
+
+internal static class ResourceExtensions
 {
-    public enum EditMode
-    {
-        Create,
-        Edit
-    }
 }

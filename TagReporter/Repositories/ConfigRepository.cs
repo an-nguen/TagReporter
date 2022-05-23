@@ -8,7 +8,7 @@ using TagReporter.Models;
 
 namespace TagReporter.Repositories
 {
-    public class ConfigRepository : BaseRepository<Config>
+    public class ConfigRepository : LiteDbBaseRepository<Config>
     {
         public ConfigRepository() : base("config", CommonResources.ConnectionString)
         {

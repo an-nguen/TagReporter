@@ -1,4 +1,4 @@
-﻿<Page x:Class="TagReporter.Views.ReportFormPage"
+﻿<Page x:Class="TagReporter.Views.MainPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,12 +7,10 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ReportFormPage">
-
+      Title="MainPage">
     <Page.Resources>
         <ResourceDictionary x:Name="PageResourceDictionary">
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/lang.en-US.xaml" />
                 <ResourceDictionary Source="Resources/style.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -33,8 +31,8 @@
                 <RowDefinition Height="18" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <TextBlock Text="{DynamicResource ZoneGroups}" />
-            <ListView x:Name="ZoneGroupListView" Grid.Row="1" Margin="2" ItemsSource="{Binding ZoneGroups}" SelectedItem="{Binding SelectedZoneGroup}" local:GridViewSort.AutoSort="True" >
+            <TextBlock Text="{Binding ResourceDictionaryService[ZoneGroups]}" />
+            <ListView x:Name="ZoneGroupListView" Grid.Row="1" Margin="2" ItemsSource="{Binding ZoneGroups}" SelectedItem="{Binding SelectedZoneGroup}" >
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding ZoneGroupSelectionChangedCmd}" />
@@ -49,8 +47,7 @@
                 <ListView.View>
                     <GridView>
                         <GridView.Columns>
-                            <GridViewColumn Header="{DynamicResource Name}" DisplayMemberBinding="{Binding Name}" 
-                                            local:GridViewSort.PropertyName="Name" />
+                            <GridViewColumn Header="{Binding ResourceDictionaryService[Name]}" DisplayMemberBinding="{Binding Name}" />
                         </GridView.Columns>
                     </GridView>
                 </ListView.View>
@@ -62,8 +59,8 @@
                 <RowDefinition />
                 <RowDefinition Height="28" />
             </Grid.RowDefinitions>
-            <TextBlock Text="{DynamicResource ResourceKey=Zones}" />
-            <ListView x:Name="ZoneListView" Grid.Row="1"  Margin="2" ItemsSource="{Binding Zones}" SelectedItem="{Binding SelectedZone}" local:GridViewSort.AutoSort="True">
+            <TextBlock Text="{Binding ResourceDictionaryService[Zones]}" />
+            <ListView x:Name="ZoneListView" Grid.Row="1"  Margin="2" ItemsSource="{Binding Zones}" SelectedItem="{Binding SelectedZone}" >
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding ZoneSelectionChangedCmd}" CommandParameter="{Binding SelectedZone}" />
@@ -81,7 +78,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Header="{DynamicResource Name}" Width="240" 
+                            <GridViewColumn Header="{Binding ResourceDictionaryService[Name]}" Width="240" 
                                             DisplayMemberBinding="{Binding Name}"
                                             local:GridViewSort.PropertyName="Name" />
                         </GridView.Columns>
@@ -93,8 +90,8 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Margin="5, 2" Content="{DynamicResource SelectAll}"></Button>
-                <Button Grid.Column="1"  Margin="5, 2" Content="{DynamicResource DeselectAll}"></Button>
+                <Button Margin="5, 2" Content="{Binding ResourceDictionaryService[SelectAll]}" Command="{Binding CheckAllZonesCmd}"></Button>
+                <Button Grid.Column="1"  Margin="5, 2" Content="{Binding ResourceDictionaryService[DeselectAll]}" Command="{Binding UncheckAllZonesCmd}"></Button>
             </Grid>
         </Grid>
 
@@ -103,15 +100,15 @@
                 <RowDefinition Height="18" />
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBlock Text="{DynamicResource Tags}" />
-            <ListView x:Name="TagListView" Grid.Row="1" Margin="2" ItemsSource="{Binding Tags}" local:GridViewSort.AutoSort="True">
+            <TextBlock Text="{Binding ResourceDictionaryService[Tags]}" />
+            <ListView x:Name="TagListView" Grid.Row="1" Margin="2" ItemsSource="{Binding Tags}">
                 <ListView.View>
                     <GridView>
                         <GridView.Columns>
-                            <GridViewColumn Header="{DynamicResource Tag}" Width="180" 
+                            <GridViewColumn Header="{Binding ResourceDictionaryService[Tag]}" Width="180" 
                                             DisplayMemberBinding="{Binding Name}" 
                                             local:GridViewSort.PropertyName="Name" />
-                            <GridViewColumn Header="{DynamicResource Manager}" Width="180" 
+                            <GridViewColumn Header="{Binding ResourceDictionaryService[Manager]}" Width="180" 
                                             DisplayMemberBinding="{Binding TagManagerName}" 
                                             local:GridViewSort.PropertyName="TagManagerName" />
                         </GridView.Columns>
@@ -122,18 +119,18 @@
 
 
         <DockPanel Grid.Row="2">
-            <TextBlock HorizontalAlignment="Center" Width="64" Text="{DynamicResource Start}" />
+            <TextBlock HorizontalAlignment="Center" Width="64" Text="{Binding ResourceDictionaryService[Start]}" />
             <DatePicker SelectedDate="{Binding StartDateTime}" SelectedDateFormat="Short" />
-            <local:TimePicker Value="{Binding StartTimeSpan, Mode=TwoWay}" />
+            <local:TimePicker Value="{Binding StartTimeSpan,  Mode=TwoWay}" />
         </DockPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Width="80" Content="{DynamicResource Morning}" Margin="2, 0" Command="{Binding SetMorningTimeCmd}" />
-            <Button Width="80" Content="{DynamicResource Evening}" Margin="2, 0" Command="{Binding SetEveningTimeCmd}" />
-            <Button Width="80" Content="{DynamicResource Weekly}" Margin="2, 0" Command="{Binding SetWeeklyTimeCmd}" />
-            <Button Width="80" Content="{DynamicResource FriToMon}" Margin="2, 0" Command="{Binding SetFriToMonTimeCmd}" />
+            <Button Width="80" Content="{Binding ResourceDictionaryService[Morning]}" Margin="2, 0" Command="{Binding SetMorningTimeCmd}" />
+            <Button Width="80" Content="{Binding ResourceDictionaryService[Evening]}" Margin="2, 0" Command="{Binding SetEveningTimeCmd}" />
+            <Button Width="80" Content="{Binding ResourceDictionaryService[Weekly]}" Margin="2, 0" Command="{Binding SetWeeklyTimeCmd}" />
+            <Button Width="80" Content="{Binding ResourceDictionaryService[FriToMon]}" Margin="2, 0" Command="{Binding SetFriToMonTimeCmd}" />
         </StackPanel>
         <DockPanel Grid.Row="3">
-            <TextBlock HorizontalAlignment="Center" Width="64" Text="{DynamicResource End}" />
+            <TextBlock HorizontalAlignment="Center" Width="64" Text="{Binding ResourceDictionaryService[End]}" />
             <DatePicker SelectedDate="{Binding EndDateTime}" SelectedDateFormat="Short" />
             <local:TimePicker Value="{Binding EndTimeSpan, Mode=TwoWay}" />
         </DockPanel>
@@ -143,7 +140,7 @@
                       ItemsSource="{Binding MeasurementDataTypes}" 
                       DisplayMemberPath="Name" SelectedValuePath="Value">
             </ComboBox>
-            <Button Width="120" HorizontalAlignment="Right" Content="{DynamicResource CreateReport}" Command="{Binding CreateReportCmd}" IsEnabled="{Binding IsSettingsValid}" />
+            <Button Width="120" HorizontalAlignment="Right" Content="{Binding ResourceDictionaryService[CreateReport]}" Command="{Binding CreateReportCmd}" IsEnabled="{Binding IsSettingsValid}" />
         </StackPanel>
     </Grid>
 </Page>

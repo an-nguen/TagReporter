@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LiteDB;
+﻿using LiteDB;
 
-namespace TagReporter.Models
+namespace TagReporter.Models;
+
+public class Config
 {
-    public class Config
-    {
-        [BsonId(false)]
-        public string? Parameter { get; set; }
-        public string? Value { get; set; }
-    }
+    [BsonId(false)]
+    public string? Parameter { get; set; }
+    public string? Value { get; set; }
 }

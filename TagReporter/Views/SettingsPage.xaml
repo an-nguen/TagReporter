@@ -4,7 +4,6 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:local="clr-namespace:TagReporter.Views"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="SettingsPage">
@@ -19,11 +18,11 @@
     
     <StackPanel Orientation="Vertical">
         <StackPanel Margin="5" Orientation="Horizontal">
-            <TextBlock Width="80" Text="{DynamicResource ResourceKey=Language}" />
+            <TextBlock Width="80" Text="{Binding Path=ResourceDictionaryService[Language]}" />
             <ComboBox Width="240"
                       SelectedValue="{Binding SelectedLanguage, Mode=TwoWay}" 
                       ItemsSource="{Binding Languages}" 
-                      DisplayMemberPath="Name" SelectedValuePath="Value"
+                      DisplayMemberPath="Value" SelectedValuePath="Key"
                       >
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
@@ -33,7 +32,7 @@
             </ComboBox>
         </StackPanel>
         <StackPanel Margin="5" Orientation="Horizontal">
-            <TextBlock Width="80" Text="{DynamicResource ResourceKey=Path}" />
+            <TextBlock Width="80" Text="{Binding Path=ResourceDictionaryService[Path]}" />
             <TextBox Width="240" Text="{Binding SavePath, Mode=TwoWay}" Margin="0, 0, 10 , 0">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="LostFocus">
@@ -41,7 +40,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
-            <Button x:Name="SelectDirBtn" Command="{Binding SelectDirCmd}" Content="{DynamicResource ResourceKey=SelectDir}" />
+            <Button x:Name="SelectDirBtn" Command="{Binding SelectDirCmd}" Content="{Binding Path=ResourceDictionaryService[SelectDir]}" />
         </StackPanel>
     </StackPanel>
 </Page>
