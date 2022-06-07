@@ -21,6 +21,19 @@ public class AccountEditViewModel : ObservableRecipient
     public string? Email { get; set; }
     public string? Password { get; set; }
     private WstAccount? _account;
+    private DialogMode _mode;
+
+    public DialogMode Mode
+    {
+        get => _mode;
+        set
+        {
+            SetProperty(ref _mode, value);
+            OnPropertyChanged(nameof(IsCreateMode));
+        }
+    }
+
+    public bool IsCreateMode => _mode == DialogMode.Create;
 
     public IRelayCommand? AddEditCommand { get; set; }
     public IRelayCommand? CloseCommand { get; set; }
@@ -31,17 +44,18 @@ public class AccountEditViewModel : ObservableRecipient
         ResourceDictionaryService = resourceDictionaryService;
     }
 
-    public void SetMode(EditMode mode, WstAccount? account)
+    public void SetMode(DialogMode mode, WstAccount? account)
     {
         _account = account ?? new WstAccount();
+        Mode = mode;
 
         switch (mode)
         {
-            case EditMode.Edit:
+            case DialogMode.Edit:
                 Title = AddEditBtnContent = ResourceDictionaryService["Edit"] ?? "Edit";
                 Email = _account.Email;
                 Password = _account.Password;
-                AddEditCommand = new RelayCommand(() =>
+                AddEditCommand = new RelayCommand(async () =>
                 {
                     if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
                     {
@@ -52,18 +66,18 @@ public class AccountEditViewModel : ObservableRecipient
                     }
                     try
                     {
-                        _accountRepository.Update(Email, new WstAccount(Email!, Password!));
+                        await _accountRepository.Update(Email, new WstAccount(Email!, Password!));
+                        CloseCommand?.Execute(null);
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                    CloseCommand?.Execute(null);
                 });
                 break;
-            case EditMode.Create:
+            case DialogMode.Create:
                 Title = AddEditBtnContent = ResourceDictionaryService["Add"] ?? "Add";
-                AddEditCommand = new RelayCommand(() =>
+                AddEditCommand = new RelayCommand(async () =>
                 {
                     if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
                     {
@@ -74,13 +88,13 @@ public class AccountEditViewModel : ObservableRecipient
                     }
                     try
                     {
-                        _accountRepository.Create(new WstAccount(Email!, Password!));
+                        await _accountRepository.Create(new WstAccount(Email!, Password!));
+                        CloseCommand?.Execute(null);
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                    CloseCommand?.Execute(null);
                 });
                 break;
             default:

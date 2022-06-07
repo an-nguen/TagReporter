@@ -10,25 +10,25 @@ namespace TagReporter.Repositories;
 
 public class ZoneRepository: IZoneRepository
 {
-    private readonly AppContext _context;
+    private readonly AppDbContext _dbContext;
     private List<ZoneTagUuid> ZoneTagUuids { get; set; } = new();
     private List<Tag> Tags { get; set; } = new();
 
-    public ZoneRepository(AppContext context)
+    public ZoneRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
         UpdateInMemoryData();
     }
 
     public void UpdateInMemoryData()
     {
-        ZoneTagUuids = _context.ZoneTagUuids.ToList();
-        Tags = _context.Tags.ToList();
+        ZoneTagUuids = _dbContext.ZoneTagUuids.ToList();
+        Tags = _dbContext.Tags.ToList();
     }
 
     public List<Zone> FindAll()
     {
-        var zones = _context.Zones.ToList();
+        var zones = _dbContext.Zones.ToList();
         foreach (var z in zones)
         {
             z.Tags = FindTagsByZone(z);
@@ -39,7 +39,7 @@ public class ZoneRepository: IZoneRepository
 
     public async Task<List<Zone>> FindAllAsync()
     {
-        var zones = await _context.Zones.ToListAsync();
+        var zones = await _dbContext.Zones.ToListAsync();
         foreach (var z in zones) z.Tags = await FindTagsByZoneAsync(z);
         return zones;
     }
@@ -52,58 +52,56 @@ public class ZoneRepository: IZoneRepository
 
     public async Task<List<Tag>> FindTagsByZoneAsync(Zone zone)
     {
-        var uuids = await _context.ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == zone.Id).Select(ztu => ztu.TagUuid).ToListAsync();
-        return await _context.Tags.Where(t => uuids.Contains(t.Uuid)).ToListAsync();
+        var uuids = await _dbContext.ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == zone.Id).Select(ztu => ztu.TagUuid).ToListAsync();
+        return await _dbContext.Tags.Where(t => uuids.Contains(t.Uuid)).ToListAsync();
     }
     public List<Guid> FindTagUuidsByZone(Zone zone)
     {
         var uuids = ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == zone.Id).Select(ztu => ztu.TagUuid).ToList();
-        return _context.Tags.Where(t => uuids.Contains(t.Uuid)).Select(t => t.Uuid).ToList();
+        return _dbContext.Tags.Where(t => uuids.Contains(t.Uuid)).Select(t => t.Uuid).ToList();
     }
 
     public async Task Create(Zone zone)
     {
         if (string.IsNullOrEmpty(zone.Name)) throw new Exception("[Create] zone.Name is empty");
-        _context.Add(zone);
-        await _context.SaveChangesAsync();
-        await _context.AddRangeAsync(zone.TagUuids.Select(uuid => new ZoneTagUuid
+        _dbContext.Zones.Add(zone);
+        await _dbContext.SaveChangesAsync();
+        await _dbContext.AddRangeAsync(zone.TagUuids.Select(uuid => new ZoneTagUuid
         {
             ZoneId = zone.Id,
             TagUuid = uuid
         }));
-        await _context.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
         UpdateInMemoryData();
     }
 
     public async Task Update(int? id, Zone zone)
     {
-        if (id == null || id != zone.Id)
-            throw new Exception("[Update] Zone Id not equals Id");
-        var updZone = await _context.Zones.FindAsync(id);
+        var updZone = await _dbContext.Zones.FindAsync(id);
         if (updZone == null) throw new Exception($"[Update] Zone with {id} not found!");
         updZone.Name = zone.Name;
-        _context.Update(updZone);
-        await _context.SaveChangesAsync();
-        _context.ZoneTagUuids.RemoveRange(
-            _context.ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == updZone.Id));
-        await _context.SaveChangesAsync();
-        await _context.AddRangeAsync(zone.TagUuids.Select(uuid => new ZoneTagUuid
+        _dbContext.Update(updZone);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ZoneTagUuids.RemoveRange(
+            _dbContext.ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == updZone.Id));
+        await _dbContext.SaveChangesAsync();
+        await _dbContext.AddRangeAsync(zone.TagUuids.Select(uuid => new ZoneTagUuid
         {
             ZoneId = updZone.Id,
             TagUuid = uuid
         }));
-        await _context.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
         UpdateInMemoryData();
     }
 
     public async Task Delete(int id)
     {
-        var zone = await _context.Zones.FindAsync(id);
+        var zone = await _dbContext.Zones.FindAsync(id);
         if (zone == null) throw new Exception("[Delete] ");
-        _context.ZoneTagUuids.RemoveRange(
-            _context.ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == zone.Id));
-        _context.Zones.Remove(zone);
-        await _context.SaveChangesAsync();
+        _dbContext.ZoneTagUuids.RemoveRange(
+            _dbContext.ZoneTagUuids.Where(zoneTagUuid => zoneTagUuid.ZoneId == zone.Id));
+        _dbContext.Zones.Remove(zone);
+        await _dbContext.SaveChangesAsync();
         UpdateInMemoryData();
     }
 

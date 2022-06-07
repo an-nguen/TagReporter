@@ -47,11 +47,11 @@ public class ZoneGroupMgrViewModel : ObservableRecipient
         UpdateGroups();
         AddCmd = new RelayCommand(() =>
         {
-            ShowEditDialog(EditMode.Create);
+            ShowEditDialog(DialogMode.Create);
         });
         EditCmd = new RelayCommand(() =>
         {
-            ShowEditDialog(EditMode.Edit, SelectedItem);
+            ShowEditDialog(DialogMode.Edit, SelectedItem);
         });
         RemoveCmd = new RelayCommand(() =>
         {
@@ -67,7 +67,7 @@ public class ZoneGroupMgrViewModel : ObservableRecipient
         _zoneGroupRepository.FindAll().ForEach(ZoneGroups.Add);
     }
 
-    public void ShowEditDialog(EditMode mode, ZoneGroup? group = null)
+    public void ShowEditDialog(DialogMode mode, ZoneGroup? group = null)
     {
         var wnd = _zoneGroupEditWindowFactory.Create(mode, group);
         wnd.ViewModel.CloseCmd = new RelayCommand(() =>

@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
         <StackPanel Margin="5">
             <TextBlock Text="{Binding ResourceDictionaryService[Email]}" />
-            <TextBox Text="{Binding Email}" />
+            <TextBox Text="{Binding Email}" IsEnabled="{Binding IsCreateMode}" />
         </StackPanel>
         <StackPanel Margin="5" Grid.Row="1">
             <TextBlock Text="{Binding ResourceDictionaryService[Password]}" />

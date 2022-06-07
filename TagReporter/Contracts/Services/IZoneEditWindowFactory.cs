@@ -5,5 +5,5 @@ namespace TagReporter.Contracts.Services;
 
 public interface IZoneEditWindowFactory
 {
-    public ZoneEditWindow Create(EditMode mode, Zone? zone);
+    public ZoneEditWindow Create(DialogMode mode, Zone? zone);
 }

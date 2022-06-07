@@ -20,7 +20,7 @@ public class AccountEditWindowFactory: IAccountEditWindowFactory
         _viewModel = viewModel;
     }
 
-    public AccountEditWindow Create(EditMode mode, WstAccount? account)
+    public AccountEditWindow Create(DialogMode mode, WstAccount? account)
     {
         var wnd = new AccountEditWindow(_viewModel);
         _viewModel.SetMode(mode, account);

@@ -10,5 +10,5 @@ namespace TagReporter.Contracts.Services;
 
 public interface IAccountEditWindowFactory
 {
-    public AccountEditWindow Create(EditMode mode, WstAccount? account);
+    public AccountEditWindow Create(DialogMode mode, WstAccount? account);
 }

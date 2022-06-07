@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
@@ -44,14 +45,14 @@ public class SettingsViewModel : ObservableRecipient
     {
         _configRepository = configRepository;
         ResourceDictionaryService = resourceDictionaryService;
-        var savePathConfigParam = _configRepository.FindAll().Find(x => x.Parameter == "save_path");
+        var savePathConfigParam = _configRepository.FindAll().FirstOrDefault(x => x.Parameter == "save_path");
         SavePath = savePathConfigParam != null ? savePathConfigParam.Value : @".";
-        SelectedLanguage = _configRepository.Collection().FindById("language").Value;
-
+        var languageConfig = _configRepository.FindAll().FirstOrDefault(c => c.Parameter == "language");
+        SelectedLanguage = languageConfig != null ? languageConfig.Value : "en-US";
         LangSelectionChangedCmd = new RelayCommand(() =>
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo(SelectedLanguage!);
-            _configRepository.Update(_configRepository.Collection().FindById("language"), new Config { Parameter = "language", Value = SelectedLanguage! });
+            _configRepository.Update(_configRepository.FindAll().First(c => c.Parameter == "language"), new Config { Parameter = "language", Value = SelectedLanguage! });
             ResourceDictionaryService.CurrentLanguage = SelectedLanguage;
         });
 

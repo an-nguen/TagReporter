@@ -1,6 +1,6 @@
 ﻿namespace TagReporter.Views;
 
-public enum EditMode
+public enum DialogMode
 {
     Create,
     Edit

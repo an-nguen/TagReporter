@@ -3,9 +3,9 @@ using TagReporter.Models;
 
 namespace TagReporter;
 
-public class AppContext : DbContext
+public class AppDbContext : DbContext
 {
-    public AppContext(DbContextOptions options) : base(options)
+    public AppDbContext(DbContextOptions options) : base(options)
     {
 
     }

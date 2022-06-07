@@ -9,7 +9,7 @@ namespace TagReporter.Models;
 public class Zone: ReactiveObject
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public string? Name { get; set; }
     [NotMapped] public List<Tag> Tags { get; set; } = new List<Tag>();

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -37,7 +38,7 @@ public class ZoneMgrViewModel : ObservableRecipient
     public ICommand EditCmd { get; }
     public ICommand RemoveCmd { get; }
 
-    public async void UpdateZones()
+    public async Task UpdateZones()
     {
         Zones.Clear();
         _statusBarService.Loading = true;
@@ -55,32 +56,32 @@ public class ZoneMgrViewModel : ObservableRecipient
         _zoneEditWindowFactory = zoneEditWindowFactory;
         ResourceDictionaryService = resourceDictionaryService;
         _statusBarService = statusBarService;
-        UpdateZones();
         AddCmd = new RelayCommand(() =>
         {
-            ShowEditDialog(EditMode.Create);
+            ShowEditDialog(DialogMode.Create);
 
         });
         EditCmd = new RelayCommand(() =>
         {
-            ShowEditDialog(EditMode.Edit, SelectedItem);
+            ShowEditDialog(DialogMode.Edit, SelectedItem);
         });
-        RemoveCmd = new RelayCommand(() =>
+        RemoveCmd = new RelayCommand(async () =>
         {
             if (SelectedItem == null) return;
-            _zoneRepository.Delete(SelectedItem.Id);
-            UpdateZones();
+            await _zoneRepository.Delete(SelectedItem.Id);
+            await UpdateZones();
         });
+        UpdateZones();
     }
 
-    public void ShowEditDialog(EditMode mode, Zone? zone = null)
+    public void ShowEditDialog(DialogMode mode, Zone? zone = null)
     {
         if (zone != null)
             zone.TagUuids = _zoneRepository.FindTagUuidsByZone(zone);
         var window = _zoneEditWindowFactory.Create(mode, zone);
-        window.ViewModel.CloseCmd = new RelayCommand(() =>
+        window.ViewModel.CloseCmd = new RelayCommand(async () =>
         {
-            UpdateZones();
+            await UpdateZones();
             window.Close();
         });
         window.ShowDialog();

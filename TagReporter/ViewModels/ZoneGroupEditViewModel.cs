@@ -63,7 +63,7 @@ public class ZoneGroupEditViewModel : ObservableRecipient
         zones.ForEach(Zones.Add);
     }
 
-    public void SetMode(EditMode mode, ZoneGroup? group)
+    public void SetMode(DialogMode mode, ZoneGroup? group)
     {
         _zoneGroup = group ?? new ZoneGroup();
         Name = _zoneGroup.Name;
@@ -72,7 +72,7 @@ public class ZoneGroupEditViewModel : ObservableRecipient
 
         switch (mode)
         {
-            case EditMode.Edit:
+            case DialogMode.Edit:
                 Title = AddEditBtnContent = ResourceDictionaryService?["Edit"] ?? "Edit";
                 foreach (var z in _zoneGroup.Zones)
                 {
@@ -102,7 +102,7 @@ public class ZoneGroupEditViewModel : ObservableRecipient
                     CloseCmd?.Execute(null);
                 });
                 break;
-            case EditMode.Create:
+            case DialogMode.Create:
                 Title = AddEditBtnContent = ResourceDictionaryService?["Add"] ?? "Add";
                 AddEditCmd = new RelayCommand(() =>
                 {

@@ -15,7 +15,7 @@ public class ZoneGroupEditWindowFactory: IZoneGroupEditWindowFactory
         _viewModel = viewModel;
     }
 
-    public ZoneGroupEditWindow Create(EditMode mode, ZoneGroup? group)
+    public ZoneGroupEditWindow Create(DialogMode mode, ZoneGroup? group)
     {
         var wnd = new ZoneGroupEditWindow(_viewModel);
         _viewModel.SetMode(mode, group);

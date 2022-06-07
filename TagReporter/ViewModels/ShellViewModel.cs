@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.VisualBasic.ApplicationServices;
 using TagReporter.Contracts.Repositories;
 using TagReporter.Contracts.Services;
 using TagReporter.DTOs;
@@ -54,8 +55,12 @@ public class ShellViewModel : ObservableRecipient
         ResourceDictionaryService = resourceDictionaryService;
         StatusBarService = statusBarService;
         
-        var buildDateTime = GetLinkerTime(Assembly.GetEntryAssembly());
-        WindowTitle = $"Tag Reporter (Build date: {buildDateTime:G})";
+        WindowTitle = $"Tag Reporter {Assembly.GetExecutingAssembly().GetName().Version?.ToString()}";
+        NavigationService.Navigated += (sender, s) =>
+        {
+            OnPropertyChanged(nameof(CanGoForward));
+            OnPropertyChanged(nameof(CanGoBack));
+        };
 
         OpenReportFormPageCommand = new RelayCommand(() => NavigationService.NavigateTo(typeof(MainViewModel).FullName!));
         OpenAccountMgrPageCommand = new RelayCommand(() => NavigationService.NavigateTo(typeof(AccountMgrViewModel).FullName!));
@@ -138,12 +143,7 @@ public class ShellViewModel : ObservableRecipient
             };
             var dbTag = dbTags.FirstOrDefault(t => t.Uuid == tag.Uuid);
             if (dbTag != null)
-            {
-                MessageBox.Show($"{ResourceDictionaryService["TagDuplicationDetected"] ?? "TagDuplicationDetected"}\n" +
-                                $"{ResourceDictionaryService["Tag"] ?? "Tag"}: {tag.Uuid} - {tag.Name}\n",
-                    "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 continue;
-            }
             await _tagRepository.Create(tag);
         }
 

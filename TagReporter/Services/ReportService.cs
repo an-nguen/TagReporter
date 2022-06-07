@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
@@ -23,11 +24,13 @@ public class ReportService
     private readonly IZoneRepository _zoneRepository;
     private readonly ResourceDictionaryService _resourceDictionaryService;
     private readonly StatusBarService _statusBarService;
-    public ReportService(IZoneRepository zoneRepository, ResourceDictionaryService resourceDictionaryService, StatusBarService statusBarService)
+    private readonly ILogger _logger;
+    public ReportService(IZoneRepository zoneRepository, ResourceDictionaryService resourceDictionaryService, StatusBarService statusBarService, ILogger<ReportService> logger)
     {
         _zoneRepository = zoneRepository;
         _resourceDictionaryService = resourceDictionaryService;
         _statusBarService = statusBarService;
+        _logger = logger;
     }
 
 
@@ -82,7 +85,8 @@ public class ReportService
             var responseBody = await response.Content.ReadAsStringAsync();
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                MessageBox.Show($"[DownloadMeasurements] statusCode = {response.StatusCode}", "Error");
+                MessageBox.Show($"[DownloadMeasurements] statusCode = {response.StatusCode}\n{response.Content}", "Error");
+                _logger.LogError("[DownloadMeasurements] statusCode = {}\n{}", response.StatusCode, response.Content);
                 continue;
             }
 
@@ -100,9 +104,13 @@ public class ReportService
             tag.Measurements = tag.Measurements.Where(t => t.DateTime > startDate && t.DateTime < endDate).ToList();
 
             if (tag.Measurements.Count == 0)
+            {
                 MessageBox.Show(
                     $"{_resourceDictionaryService["Tag"]}: {tag.Name}.\n{_resourceDictionaryService["Period"]}: {startDate:G}-{endDate:G}\n{_resourceDictionaryService["NoMeasurements"]}",
                     "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _logger.LogError("{}: {} {}-{} {}", _resourceDictionaryService["Tag"], tag.Name, startDate, endDate, 
+                    _resourceDictionaryService["NoMeasurements"]);
+            }
         }
     }
 

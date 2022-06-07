@@ -58,19 +58,19 @@ public class ZoneEditViewModel: ObservableRecipient
         UpdateTags();
     }
 
-    public void SetMode(EditMode mode, Zone? zone)
+    public void SetMode(DialogMode mode, Zone? zone)
     {
         _zone = zone;
         Name = _zone?.Name;
 
         switch (mode)
         {
-            case EditMode.Edit:
+            case DialogMode.Edit:
                 Title = AddEditBtnContent = ResourceDictionaryService?["Edit"] ?? "Edit";
                 foreach (var found in Tags.Where(t => _zone!.TagUuids.Contains(t.Uuid)))
                     found.IsChecked = true;
 
-                AddEditCmd = new RelayCommand(() =>
+                AddEditCmd = new RelayCommand(async () =>
                 {
                     if (string.IsNullOrEmpty(Name))
                     {
@@ -81,22 +81,22 @@ public class ZoneEditViewModel: ObservableRecipient
 
                     try
                     {
-                        _zoneRepository?.Update(_zone!.Id, new Zone
+                        await _zoneRepository?.Update(_zone!.Id, new Zone
                         {
                             Name = Name,
                             TagUuids = Tags.Where(t => t.IsChecked).Select(t => t.Uuid).ToList()
-                        });
+                        })!;
+                        CloseCmd?.Execute(null);
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }  
-                    CloseCmd?.Execute(null);
                 });
                 break;
-            case EditMode.Create:
+            case DialogMode.Create:
                 Title = AddEditBtnContent = ResourceDictionaryService?["Add"] ?? "Add";
-                AddEditCmd = new RelayCommand(() =>
+                AddEditCmd = new RelayCommand(async () =>
                 {
                     if (string.IsNullOrEmpty(Name))
                     {
@@ -107,18 +107,18 @@ public class ZoneEditViewModel: ObservableRecipient
 
                     try
                     {
-                        _zoneRepository?.Create(new Zone
+                        await _zoneRepository?.Create(new Zone
                         {
                             Name = Name,
                             TagUuids = Tags.Where(t => t.IsChecked).Select(t => t.Uuid).ToList(),
-                        });
+                        })!;
+                        CloseCmd?.Execute(null);
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
 
-                    CloseCmd?.Execute(null);
                 });
                 break;
             default:

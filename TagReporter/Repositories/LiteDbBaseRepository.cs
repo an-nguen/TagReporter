@@ -22,18 +22,6 @@ public class LiteDbBaseRepository<T> : IRepository<T>
         return db.GetCollection<T>(TableName).Query().ToList();
     }
 
-    public ILiteCollection<T> Collection()
-    {
-        using var db = new LiteDatabase(ConnString);
-        return db.GetCollection<T>(TableName);
-    }
-
-    public ILiteQueryable<T> Query()
-    {
-        using var db = new LiteDatabase(ConnString);
-        return db.GetCollection<T>(TableName).Query();
-    }
-
     public BsonValue Create(T obj)
     {
         using var db = new LiteDatabase(ConnString);

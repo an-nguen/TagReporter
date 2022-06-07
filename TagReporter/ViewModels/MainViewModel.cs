@@ -34,16 +34,17 @@ public class MainViewModel : ObservableObject
     private DateTime _endDateTime;
 
     private readonly IZoneRepository _zoneRepository;
+    private readonly ZoneGroupRepository _zoneGroupRepository;
+    private readonly ConfigRepository _configRepository;
+
     private readonly ReportService _reportService;
-    private readonly ZoneGroupRepository _zoneGroupRepository = new();
-    private readonly ConfigRepository _configRepository = new();
+    private readonly StatusBarService _statusBarService;
 
     public ObservableCollection<ZoneGroup> ZoneGroups { get; } = new();
     public ObservableCollection<Zone> Zones { get; } = new();
     public ObservableCollection<Tag> Tags { get; } = new();
 
     public ResourceDictionaryService ResourceDictionaryService { get; set; }
-    private readonly StatusBarService _statusBarService;
 
 
     public List<ComboBoxItem> MeasurementDataTypes { get; }
@@ -144,11 +145,15 @@ public class MainViewModel : ObservableObject
 
     public MainViewModel(IZoneRepository zoneRepository,
         ReportService reportService,
+        ZoneGroupRepository zoneGroupRepository,
+        ConfigRepository configRepository,
         ResourceDictionaryService resourceDictionaryService,
         StatusBarService statusBarService)
     {
         _zoneRepository = zoneRepository;
         _reportService = reportService;
+        _zoneGroupRepository = zoneGroupRepository;
+        _configRepository = configRepository;
         ResourceDictionaryService = resourceDictionaryService;
         _zoneGroupRepository.FindAll().ForEach(ZoneGroups.Add);
         _statusBarService = statusBarService;
@@ -252,8 +257,8 @@ public class MainViewModel : ObservableObject
             if (SelectedZoneGroup == null) return;
 
             Tags.Clear();
-            var zoneGroup = _zoneGroupRepository.Query().Where(zg => zg.Id == SelectedZoneGroup.Id)
-                .FirstOrDefault();
+            var zoneGroup = _zoneGroupRepository.FindAll()
+                .FirstOrDefault(zg => zg.Id == SelectedZoneGroup.Id);
             zoneGroup.Zones.ForEach(z =>
             {
                 var tags = _zoneRepository.FindTagsByZone(z);
@@ -267,7 +272,7 @@ public class MainViewModel : ObservableObject
                 zone.IsChecked = false;
 
 
-            var zoneGroup = _zoneGroupRepository.Query()
+            var zoneGroup = _zoneGroupRepository.FindAll()
                 .Where(zg => SelectedZoneGroup != null && zg.Id == SelectedZoneGroup.Id).FirstOrDefault();
             zoneGroup.Zones.ForEach(z =>
             {

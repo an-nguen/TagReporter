@@ -33,24 +33,27 @@
                 <RowDefinition />
                 <RowDefinition Height="28" />
             </Grid.RowDefinitions>
-            <DataGrid Grid.ColumnSpan="2" AutoGenerateColumns="False" ItemsSource="{Binding Tags}" Margin="5">
+            <FrameworkElement x:Name="proxy" DataContext="{Binding}"/>
+            <DataGrid Grid.ColumnSpan="2" AutoGenerateColumns="False" ItemsSource="{Binding Tags}" 
+                      CanUserAddRows="False"
+                      Margin="5">
                 <DataGrid.Columns>
-                    <DataGridCheckBoxColumn Binding="{Binding Path=IsChecked}"></DataGridCheckBoxColumn>
-                    <DataGridTextColumn Header="{Binding ResourceDictionaryService[Tag]}" Binding="{Binding Path=Name}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="{Binding ResourceDictionaryService[Manager]}" Binding="{Binding Path=TagManagerName}"></DataGridTextColumn>
+                    <DataGridCheckBoxColumn IsReadOnly="False" Binding="{Binding Path=IsChecked}"></DataGridCheckBoxColumn>
+                    <DataGridTextColumn IsReadOnly="True"  Header="{Binding Source={x:Reference proxy}, Path=DataContext.ResourceDictionaryService[Tag]}" Binding="{Binding Path=Name}"></DataGridTextColumn>
+                    <DataGridTextColumn IsReadOnly="True"  Header="{Binding Source={x:Reference proxy}, Path=DataContext.ResourceDictionaryService[Manager]}" Binding="{Binding Path=TagManagerName}"></DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <Button Margin="5, 0" Grid.Row="1" Content="{Binding ResourceDictionaryService[SelectAll]}" Command="{Binding SelectAllCmd}" />
             <Button Margin="5, 0" Grid.Row="1" Grid.Column="1" Content="{Binding ResourceDictionaryService[DeselectAll]}" Command="{Binding DeselectAllCmd}" />
         </Grid>
-        
+
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Button x:Name="AddEditBtn" Height="24" Margin="5, 0" Content="{Binding AddEditBtnContent}" Command="{Binding AddEditCmd}" />
-            <Button x:Name="CloseBtn" Grid.Column="1" Height="24" Margin="5, 0" Content="{DynamicResource Close}"  Command="{Binding CloseCmd}" />
+            <Button x:Name="CloseBtn" Grid.Column="1" Height="24" Margin="5, 0" Content="{Binding ResourceDictionaryService[Close]}"  Command="{Binding CloseCmd}" />
         </Grid>
 
     </Grid>

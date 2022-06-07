@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -29,7 +30,7 @@ public class AccountMgrViewModel : ObservableRecipient
         get => _selectedAccount;
         set
         {
-            SetProperty(ref _selectedAccount, value); 
+            SetProperty(ref _selectedAccount, value);
             OnPropertyChanged(nameof(IsSelected));
         }
     }
@@ -40,17 +41,17 @@ public class AccountMgrViewModel : ObservableRecipient
     public IRelayCommand EditCmd { get; }
     public IRelayCommand RemoveCmd { get; }
 
-    private async void UpdateAccounts()
+    private async Task UpdateAccounts()
     {
         Accounts.Clear();
         _statusBarService.Loading = true;
-        var accounts = await _accountRepository.FindAllAsync();
+        var accounts = _accountRepository.FindAll();
         accounts.ForEach(Accounts.Add);
         _statusBarService.Loading = false;
 
     }
 
-    public AccountMgrViewModel(IAccountRepository accountRepository, 
+    public AccountMgrViewModel(IAccountRepository accountRepository,
         IAccountEditWindowFactory accountEditWindowFactory,
         ResourceDictionaryService resourceDictionaryService,
         StatusBarService statusBarService)
@@ -59,14 +60,13 @@ public class AccountMgrViewModel : ObservableRecipient
         _accountEditWindowFactory = accountEditWindowFactory;
         ResourceDictionaryService = resourceDictionaryService;
         _statusBarService = statusBarService;
-        UpdateAccounts();
         AddCmd = new RelayCommand(() =>
         {
-            ShowEditDialog(EditMode.Create);
+            ShowEditDialog(DialogMode.Create);
         });
         EditCmd = new RelayCommand(() =>
         {
-            ShowEditDialog(EditMode.Edit, SelectedAccount);
+            ShowEditDialog(DialogMode.Edit, SelectedAccount);
         });
         RemoveCmd = new RelayCommand(() =>
         {
@@ -75,10 +75,11 @@ public class AccountMgrViewModel : ObservableRecipient
             var account = Accounts.First(a => a.Email == SelectedAccount.Email);
             Accounts.Remove(account);
         });
+        UpdateAccounts();
 
     }
 
-    public void ShowEditDialog(EditMode mode, WstAccount? account = null)
+    public void ShowEditDialog(DialogMode mode, WstAccount? account = null)
     {
         var wnd = _accountEditWindowFactory.Create(mode, account);
         wnd.ViewModel.CloseCommand = new RelayCommand(() =>

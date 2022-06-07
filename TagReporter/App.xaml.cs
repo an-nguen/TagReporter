@@ -1,11 +1,14 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System;
 using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.ILogger;
 using TagReporter.Contracts.Repositories;
 using TagReporter.Contracts.Services;
 using TagReporter.Repositories;
@@ -26,15 +29,25 @@ public partial class App
 
     private async void OnStartup(object sender, StartupEventArgs e)
     {
-        var appLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location);
+        var appLocation = AppContext.BaseDirectory;
 
         _host = Host.CreateDefaultBuilder(e.Args)
             .ConfigureAppConfiguration(c => c.SetBasePath(appLocation))
+            .ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddSerilog();
+            })
+            .UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext()
+                .WriteTo.File("log.txt", LogEventLevel.Information))
             .ConfigureServices((context, services) =>
             {
                 services.AddHostedService<ApplicationHostService>();
 
-                services.AddDbContext<AppContext>(options =>
+                services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseSqlServer(context.Configuration.GetConnectionString("TagReporterDatabase"));
                 });

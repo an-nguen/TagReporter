@@ -1,78 +1,87 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <Platforms>AnyCPU;x64</Platforms>
-    <NeutralLanguage>en</NeutralLanguage>
-    <ApplicationIcon>tag_reporter_icon.ico</ApplicationIcon>
-    <Version>1.1.0</Version>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+		<!-- <PublishSingleFile>true</PublishSingleFile> -->
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<Platforms>AnyCPU;x64</Platforms>
+		<NeutralLanguage>en</NeutralLanguage>
+		<ApplicationIcon>tag_reporter_icon.ico</ApplicationIcon>
+		<Version>1.1.2</Version>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Resources\ic_fluent_arrow_left_24_regular.png" />
-    <None Remove="Resources\ic_fluent_arrow_right_24_regular.png" />
-    <None Remove="Resources\ic_fluent_arrow_sync_24_regular.png" />
-    <None Remove="Resources\ic_fluent_border_24_regular.png" />
-    <None Remove="Resources\ic_fluent_document_24_regular.png" />
-    <None Remove="Resources\ic_fluent_group_24_regular.png" />
-    <None Remove="Resources\ic_fluent_person_24_regular.png" />
-    <None Remove="Resources\ic_fluent_settings_24_regular.png" />
-    <None Remove="Resources\tag_reporter_icon.png" />
-    <None Remove="Views\ic_fluent_document_24_regular.svg" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Resources\ic_fluent_arrow_left_24_regular.png" />
+		<None Remove="Resources\ic_fluent_arrow_right_24_regular.png" />
+		<None Remove="Resources\ic_fluent_arrow_sync_24_regular.png" />
+		<None Remove="Resources\ic_fluent_border_24_regular.png" />
+		<None Remove="Resources\ic_fluent_document_24_regular.png" />
+		<None Remove="Resources\ic_fluent_group_24_regular.png" />
+		<None Remove="Resources\ic_fluent_person_24_regular.png" />
+		<None Remove="Resources\ic_fluent_settings_24_regular.png" />
+		<None Remove="Resources\tag_reporter_icon.png" />
+		<None Remove="Views\ic_fluent_document_24_regular.svg" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
-    <PackageReference Include="EPPlus" Version="6.0.4" />
-    <PackageReference Include="LiteDB" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.5" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="ReactiveUI" Version="18.0.10" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="18.0.10" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+		<PackageReference Include="EPPlus" Version="6.0.4" />
+		<PackageReference Include="LiteDB" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.5" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="ReactiveUI" Version="18.0.10" />
+		<PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
+		<PackageReference Include="ReactiveUI.WPF" Version="18.0.10" />
+		<PackageReference Include="Serilog" Version="2.11.0" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="4.2.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="Serilog.Sinks.ILogger" Version="1.0.3" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Resources\ic_fluent_arrow_left_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_arrow_right_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_arrow_sync_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_border_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_document_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_group_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_person_24_regular.png" />
-    <Resource Include="Resources\ic_fluent_settings_24_regular.png" />
-    <Resource Include="Resources\tag_reporter_icon.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\ic_fluent_arrow_left_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_arrow_right_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_arrow_sync_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_border_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_document_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_group_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_person_24_regular.png" />
+		<Resource Include="Resources\ic_fluent_settings_24_regular.png" />
+		<Resource Include="Resources\tag_reporter_icon.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Views\TimeTextBox.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Views\TimeTextBox.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Page Update="Views\Resources\lang.ru-RU.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
+	<ItemGroup>
+		<Page Update="Views\Resources\lang.ru-RU.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+	</ItemGroup>
 
-  <PropertyGroup>
-    <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
+		<SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
 
 </Project>

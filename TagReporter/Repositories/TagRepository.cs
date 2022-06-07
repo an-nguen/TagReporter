@@ -16,30 +16,30 @@ namespace TagReporter.Repositories;
 
 public class TagRepository: ITagRepository
 {
-    private readonly AppContext _context;
+    private readonly AppDbContext _dbContext;
 
-    public TagRepository(AppContext context)
+    public TagRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
-    public List<Tag> FindAll() => _context.Tags.ToList();
+    public List<Tag> FindAll() => _dbContext.Tags.ToList();
 
-    public async Task<List<Tag>> FindAllAsync() => await _context.Tags.ToListAsync();
+    public async Task<List<Tag>> FindAllAsync() => await _dbContext.Tags.ToListAsync();
 
     public async Task Create(Tag tag)
     {
         if (string.IsNullOrEmpty(tag.Name))
             throw new Exception("[Create] tag.Name is null or empty");
-        _context.Add(tag);
-        await _context.SaveChangesAsync();
+        _dbContext.Add(tag);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task Update(Guid uuid, Tag tag)
     {
-        var found = await _context.Tags.Where((t) => t.Uuid == uuid).FirstOrDefaultAsync();
+        var found = await _dbContext.Tags.Where((t) => t.Uuid == uuid).FirstOrDefaultAsync();
         if (found != null) throw new Exception($"[Update] Tag with uuid - {uuid} exist");
-        _context.Tags.Add(tag);
-        await _context.SaveChangesAsync();
+        _dbContext.Tags.Add(tag);
+        await _dbContext.SaveChangesAsync();
     }
 
     public Task Delete(Guid uuid, Tag tag)
@@ -47,7 +47,7 @@ public class TagRepository: ITagRepository
         throw new NotImplementedException();
     }
 
-    public void RemoveAll() => _context.Tags.RemoveRange(_context.Tags);
+    public void RemoveAll() => _dbContext.Tags.RemoveRange(_dbContext.Tags);
     public async Task StoreTagsFromCloud(WstAccount wstAccount)
     {
         var cookieContainer = new CookieContainer();
@@ -74,7 +74,7 @@ public class TagRepository: ITagRepository
                      Account = wstAccount
                  }))
         {
-            var tagFromDb = await _context.Tags.FindAsync(tag.Uuid);
+            var tagFromDb = await _dbContext.Tags.FindAsync(tag.Uuid);
             if (tagFromDb != null)
                 continue;
 

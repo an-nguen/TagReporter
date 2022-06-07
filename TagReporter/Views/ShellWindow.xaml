@@ -19,10 +19,10 @@
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
         <StackPanel  Grid.Row="0" HorizontalAlignment="Left" Orientation="Horizontal">
-            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding CanGoBack}" Command="{Binding GoBackCmd}">
+            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding Path=CanGoBack}" Command="{Binding GoBackCmd}">
                 <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_arrow_left_24_regular.png"></Image>
             </Button>
-            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding CanGoForward}" Command="{Binding GoForwardCmd}">
+            <Button Style="{StaticResource NavBtn}" Width="24" HorizontalAlignment="Left" IsEnabled="{Binding Path=CanGoForward}" Command="{Binding GoForwardCmd}">
                 <Image Width="16" Height="16" Margin="0, 0, 3, 0" Source="pack://application:,,,/Resources/ic_fluent_arrow_right_24_regular.png"></Image>
             </Button>
         </StackPanel>

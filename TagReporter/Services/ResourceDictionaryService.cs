@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows;
 using TagReporter.Annotations;
 using TagReporter.DTOs;
+using TagReporter.Models;
 using TagReporter.Repositories;
 
 namespace TagReporter.Services;
@@ -37,7 +38,7 @@ public class ResourceDictionaryService: INotifyPropertyChanged
     {
         var path = $"Views/Resources/lang.{CurrentLanguage}.xaml";
 
-        if (Uri.IsWellFormedUriString(path, UriKind.Relative))
+        if (!string.IsNullOrEmpty(CurrentLanguage) && Uri.IsWellFormedUriString(path, UriKind.Relative))
             _resourceDictionary = (ResourceDictionary)Application.LoadComponent(new Uri(path, UriKind.Relative));
         else
             _resourceDictionary = (ResourceDictionary)Application.LoadComponent(new Uri("Views/Resources/lang.en-US.xaml", UriKind.Relative));
@@ -49,9 +50,17 @@ public class ResourceDictionaryService: INotifyPropertyChanged
 
     public ResourceDictionaryService(ConfigRepository configRepository)
     {
-        var langConfig = configRepository.FindAll().First(c => c.Parameter == "language");
-        if (langConfig != null)
-            CurrentLanguage = langConfig.Value;
+        var config = configRepository.FindAll().FirstOrDefault(c => c.Parameter == "language");
+        if (config == null)
+        {
+            configRepository.Create(new Config
+            {
+                Parameter = "language",
+                Value = "en-US"
+            });
+            config = configRepository.FindAll().First(c => c.Parameter == "language");
+        }
+        CurrentLanguage = config.Value;
         LoadDictionary();
     }
 

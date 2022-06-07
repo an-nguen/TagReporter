@@ -10,5 +10,5 @@ namespace TagReporter.Contracts.Services;
 
 public interface IZoneGroupEditWindowFactory
 {
-    public ZoneGroupEditWindow Create(EditMode mode, ZoneGroup? group);
+    public ZoneGroupEditWindow Create(DialogMode mode, ZoneGroup? group);
 }
